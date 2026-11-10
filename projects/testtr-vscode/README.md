@@ -1,6 +1,6 @@
 # TestTR for VS Code
 
-TestTR, `.testtr` dosyalarında sözdizimi renklendirmesi ve Türkçe adım şablonları sunar. Adımın ilk çift tırnağını yazınca örnek Registry'deki sayfa ve obje adları ile geçerli dosyada veya içe aldığı dosyalarda bulunan ortak adımlar önerilir.
+TestTR, `.testtr` dosyalarında sözdizimi renklendirmesi ve Türkçe adım şablonları sunar. Adımın ilk çift tırnağını yazınca Registry dizinindeki veya tek JSON dosyasındaki sayfa ve obje adları ile geçerli dosyada veya içe aldığı dosyalarda bulunan ortak adımlar önerilir.
 
 ## Kurulum
 

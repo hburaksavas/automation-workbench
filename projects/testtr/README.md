@@ -8,6 +8,8 @@ Desteklenen cümle kalıpları, hata örnekleri ve Java karşılıkları [dil s�
 
 ## Çalıştırma
 
+Bağımsız bir Maven projesiyle başlamak için [ilk test rehberini](ilk-test.md) kullan.
+
 JDK 17 ve Google Chrome kurulmalıdır. JAVA_HOME JDK 17 dizinini göstermelidir. Maven Wrapper ilk çalışmada Maven ve bağımlılıkları indirir.
 
 ```powershell
@@ -35,7 +37,9 @@ Her matris işi, oluşan TestTR Surefire XML raporlarını kendi çıktısı ola
 - Selenide, Playwright Java ve Selenium WebDriver için doğrudan Java çağrıları üretimi.
 - Maven generate-test-sources entegrasyonu ve JUnit kaynak satırı eşleme.
 
-Örnekler `example-tests/src/test/testtr`, Registry `example-tests/src/test/registry.json` içindedir. Üretilen Java, ilgili modülün `target/generated-test-sources/testtr` dizinine yazılır. Senaryo dosyası kalıcı kaynaktır. Örnek HTML ekranı giriş butonunun davranışını taklit eder.
+Örnekler `example-tests/src/test/testtr`, sayfa bazındaki Registry dosyaları `example-tests/src/test/registry/` içindedir. Üretilen Java, ilgili modülün `target/generated-test-sources/testtr` dizinine yazılır. Senaryo dosyası kalıcı kaynaktır. Örnek HTML ekranı giriş butonunun davranışını taklit eder.
+
+Varsayılan Registry yolu `src/test/registry/` dizinidir. Dizin bulunamazsa Maven ve VS Code `src/test/registry.json` dosyasını kullanır. Maven POM'unda `<registry>` ile, VS Code'da `testtr.registry` ayarıyla farklı bir dosya veya dizin seçilebilir.
 
 ## Geliştirme durumu
 

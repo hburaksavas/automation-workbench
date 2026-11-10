@@ -40,7 +40,10 @@ public final class ScenarioCompiler {
     }
 
     public List<Scenario> parseAll(Path source, Path registryPath, Path helpersPath) throws IOException {
-        JsonNode registry = json.readTree(registryPath.toFile());
+        return parseAll(source, ObjectRegistry.load(registryPath), helpersPath);
+    }
+
+    public List<Scenario> parseAll(Path source, ObjectRegistry registry, Path helpersPath) throws IOException {
         JsonNode helpers = Files.exists(helpersPath) ? json.readTree(helpersPath.toFile()) : json.createObjectNode();
         List<Scenario> result = new ArrayList<>();
         var names = new java.util.HashSet<String>();
@@ -52,7 +55,7 @@ public final class ScenarioCompiler {
         return List.copyOf(result);
     }
 
-    private Scenario parseScenario(Path source, List<ScenarioSource.Line> lines, JsonNode registry, JsonNode helpers) throws IOException {
+    private Scenario parseScenario(Path source, List<ScenarioSource.Line> lines, ObjectRegistry registry, JsonNode helpers) throws IOException {
         Map<String, Boolean> variables = new LinkedHashMap<>();
         String name = null;
         String requirement = "";
@@ -164,7 +167,7 @@ public final class ScenarioCompiler {
             }
             if (syntax.equals("@ sayfası açılır.") || syntax.equals("@ sayfası açık olmalıdır.")) {
                 page = arguments.get(0);
-                JsonNode url = registry.path("pages").path(page).path("url");
+                JsonNode url = registry.page(page).path("url");
                 if (!url.isTextual()) throw error(lines.get(index).location(), "Sayfa bulunamadı: " + page);
                 destination.add(new Step(line, syntax.equals("@ sayfası açılır.") ? "open" : "page", "", url.asText(), lines.get(index).location()));
                 continue;
@@ -198,7 +201,7 @@ public final class ScenarioCompiler {
                 default -> throw error(lines.get(index).location(), "Desteklenmeyen cümle kalıbı.");
             };
             if (page == null) throw error(lines.get(index).location(), "Önce sayfa açılmalıdır.");
-            JsonNode object = registry.path("pages").path(page).path("objects").path(arguments.get(0));
+            JsonNode object = registry.page(page).path("objects").path(arguments.get(0));
             if (object.isMissingNode()) throw error(location, "Obje bulunamadı: " + arguments.get(0));
             if (!object.path("css").isTextual() || object.path("css").asText().isBlank())
                 throw error(location, "Obje için boş olmayan CSS locator gereklidir: " + arguments.get(0));

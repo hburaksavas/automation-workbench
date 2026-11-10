@@ -107,8 +107,8 @@
         },
         "testtr.registry": {
           "type": "string",
-          "default": "src/test/registry.json",
-          "description": "Test modülüne göre dosya veya dizin yolu."
+          "default": "",
+          "description": "Test modülüne göre Registry dizini veya JSON dosyası. Boşsa src/test/registry, o yoksa src/test/registry.json kullanılır."
         },
         "testtr.generatedDirectory": {
           "type": "string",

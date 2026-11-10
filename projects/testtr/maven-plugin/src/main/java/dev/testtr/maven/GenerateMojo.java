@@ -1,6 +1,7 @@
 package dev.testtr.maven;
 
 import dev.testtr.ScenarioCompiler;
+import dev.testtr.ObjectRegistry;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,7 +22,7 @@ public final class GenerateMojo extends AbstractMojo {
     private MavenProject project;
     @Parameter(defaultValue = "${project.basedir}/src/test/testtr")
     private File sourceDirectory;
-    @Parameter(defaultValue = "${project.basedir}/src/test/registry.json")
+    @Parameter(property = "testtr.registry")
     private File registry;
     @Parameter(defaultValue = "${project.basedir}/src/test/helpers.json")
     private File helpers;
@@ -41,8 +42,13 @@ public final class GenerateMojo extends AbstractMojo {
                 try (var paths = Files.walk(sourceDirectory.toPath())) {
                     var sources = paths.filter(p -> p.toString().endsWith(".testtr")).sorted().toList();
                     var metadata = new LinkedHashMap<String, String>();
+                    ObjectRegistry objects = null;
                     if (!sources.isEmpty()) {
-                        metadata.put("registrySha256", sha256(Files.readAllBytes(registry.toPath())));
+                        Path registryPath = project.getBasedir().toPath().resolve("src/test/registry");
+                        if (registry != null) registryPath = registry.toPath();
+                        else if (!Files.exists(registryPath)) registryPath = registryPath.resolveSibling("registry.json");
+                        objects = ObjectRegistry.load(registryPath);
+                        metadata.put("registrySha256", objects.sha256());
                         metadata.put("compilerVersion", plugin.getVersion());
                         metadata.put("framework", target.name());
                         if (codeRevision != null && !codeRevision.isBlank()) {
@@ -53,7 +59,7 @@ public final class GenerateMojo extends AbstractMojo {
                     }
                     for (Path source : sources) {
                         String relative = sourceDirectory.toPath().relativize(source).toString().replace('\\', '/');
-                        for (var scenario : compiler.parseAll(source, registry.toPath(), helpers.toPath())) {
+                        for (var scenario : compiler.parseAll(source, objects, helpers.toPath())) {
                             String identity = relative + "\n" + scenario.name();
                             String id = sha256(identity.getBytes(StandardCharsets.UTF_8));
                             String name = "Scenario_" + id + "Test";

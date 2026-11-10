@@ -1,5 +1,7 @@
 package dev.testtr;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
@@ -300,6 +302,49 @@ class ScenarioCompilerTest {
         Files.writeString(source, scenario.formatted("değer"));
         var locator = assertThrows(IllegalArgumentException.class, () -> compiler.parse(source, registry));
         assertEquals("hata.testtr:3 [DSL] Obje için boş olmayan CSS locator gereklidir: Alan", locator.getMessage());
+    }
+
+    @Test void mergesRegistryFilesWithOverridesAfterBaseFiles() throws Exception {
+        Path registry = Files.createDirectory(directory.resolve("registry"));
+        Path first = registry.resolve("giris.json");
+        Path second = registry.resolve("sonuc.json");
+        Files.writeString(first, """
+                {"pages":{"Giriş":{"url":"index.html","objects":{"Ad":{"type":"input","css":"#original"},"Kaydet":{"type":"button","css":"#save"}}}}}
+                """);
+        String resultPage = """
+                {"pages":{"Sonuç":{"url":"result.html","objects":{}}}}
+                """;
+        Files.writeString(second, resultPage);
+        Path source = directory.resolve("giris.testtr");
+        Files.writeString(source, """
+                Senaryo: "İki sayfa".
+                  "Giriş" sayfası açılır.
+                  "Sonuç" sayfası açık olmalıdır.
+                Senaryo sonu.
+                """);
+
+        var scenario = new ScenarioCompiler().parse(source, registry);
+        assertEquals(List.of("index.html", "result.html"), scenario.steps().stream().map(ScenarioCompiler.Step::value).toList());
+        String checksum = ObjectRegistry.load(registry).sha256();
+        assertEquals(checksum, ObjectRegistry.load(registry).sha256());
+        Files.writeString(second, resultPage.replace("result.html", "new-result.html"));
+        assertNotEquals(checksum, ObjectRegistry.load(registry).sha256());
+
+        Files.writeString(registry.resolve("a.override.json"), """
+                {"pages":{"Giriş":{"objects":{"Ad":{"css":"#custom"},"İptal":{"type":"button","css":"#cancel"}}}}}
+                """);
+        Files.writeString(source, """
+                Senaryo: "Özelleştirilmiş sayfa".
+                  "Giriş" sayfası açılır.
+                  "Ad" alanına "Ada" yazılır.
+                  "Kaydet" düğmesine tıklanır.
+                  "İptal" düğmesine tıklanır.
+                Senaryo sonu.
+                """);
+        var customized = new ScenarioCompiler().parse(source, registry);
+        assertEquals(List.of("index.html", "#custom", "#save", "#cancel"),
+                List.of(customized.steps().get(0).value(), customized.steps().get(1).selector(),
+                        customized.steps().get(2).selector(), customized.steps().get(3).selector()));
     }
 
     @Test void preservesTurkishAndProducesAllTargetsDeterministically() throws Exception {

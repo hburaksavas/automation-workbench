@@ -1,0 +1,53 @@
+{
+  "pages": {
+    "Yanlış Sayfa": {
+      "objects": {
+        "Çift Obje": {
+          "css": ".duplicate",
+          "type": "text"
+        },
+        "Kaldırılan Obje": {
+          "css": "#removed",
+          "type": "text"
+        },
+        "Olmayan Düğme": {
+          "css": "#not-present",
+          "type": "button"
+        },
+        "Olmayan Obje": {
+          "css": "#not-present",
+          "type": "text"
+        },
+        "Olmayan Onay": {
+          "css": "#not-present",
+          "type": "checkbox"
+        },
+        "Tam Değer": {
+          "css": "#exact-value",
+          "type": "input"
+        },
+        "Gecikmeyi Başlat": {
+          "css": "#delayed-start",
+          "type": "button"
+        },
+        "Geciken Düğme": {
+          "css": "#late-button",
+          "type": "button"
+        },
+        "Sözleşme Metni": {
+          "css": "#contract-text",
+          "type": "text"
+        },
+        "Geciken Mesaj": {
+          "css": "#late-message",
+          "type": "text"
+        },
+        "Çift Seçenek": {
+          "css": "#duplicate-options",
+          "type": "select"
+        }
+      },
+      "url": "index.html?mode=other#checks"
+    }
+  }
+}

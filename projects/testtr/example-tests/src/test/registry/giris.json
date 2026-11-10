@@ -1,0 +1,37 @@
+{
+  "pages": {
+    "Giriş": {
+      "url": "index.html",
+      "objects": {
+        "Kullanıcı Adı": {
+          "type": "input",
+          "css": "#username"
+        },
+        "Giriş Yap": {
+          "type": "button",
+          "css": "#login"
+        },
+        "Mesaj": {
+          "type": "text",
+          "css": "#message"
+        },
+        "Para Birimi": {
+          "css": "#currency",
+          "type": "select"
+        },
+        "Onay": {
+          "css": "#consent",
+          "type": "checkbox"
+        },
+        "Gizli Mesaj": {
+          "css": "#hidden",
+          "type": "text"
+        },
+        "Parola": {
+          "css": "#password",
+          "type": "input"
+        }
+      }
+    }
+  }
+}

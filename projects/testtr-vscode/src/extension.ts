@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { access, readFile, readdir } from 'node:fs/promises';
+import { access, readFile, readdir, stat } from 'node:fs/promises';
 import * as path from 'node:path';
 
 const selector = { language: 'testtr', scheme: 'file' };
@@ -38,13 +38,40 @@ async function complete(document: vscode.TextDocument, position: vscode.Position
     const module = await ancestor(path.dirname(document.uri.fsPath), 'pom.xml');
     if (module) {
         try {
-            const registryPath = config(document).get('registry', 'src/test/registry.json');
-            const registry = JSON.parse(await readFile(path.resolve(module, registryPath), 'utf8'));
-            for (const [page, entry] of Object.entries<{ objects?: Record<string, unknown> }>(registry.pages ?? {})) {
-                add(page, 'Sayfa', vscode.CompletionItemKind.Module);
-                for (const object of Object.keys(entry.objects ?? {})) {
-                    add(object, page, vscode.CompletionItemKind.Field);
+            const setting = config(document).get<string>('registry');
+            let registryPath = path.resolve(module, setting || 'src/test/registry');
+            if (!setting) {
+                try {
+                    await access(registryPath);
+                } catch {
+                    registryPath = path.resolve(module, 'src/test/registry.json');
                 }
+            }
+            const files = (await stat(registryPath)).isDirectory()
+                ? (await readdir(registryPath, { withFileTypes: true }))
+                    .filter(entry => entry.isFile() && entry.name.endsWith('.json'))
+                    .map(entry => path.join(registryPath, entry.name)).sort()
+                : [registryPath];
+            const ordered = [
+                ...files.filter(file => !file.endsWith('.override.json')),
+                ...files.filter(file => file.endsWith('.override.json'))
+            ];
+            const pages = new Map<string, Set<string>>();
+            for (const file of ordered) {
+                const registry = JSON.parse(await readFile(file, 'utf8'));
+                for (const [page, entry] of Object.entries<{ objects?: Record<string, unknown> | null } | null>(registry.pages ?? {})) {
+                    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+                        pages.delete(page);
+                        continue;
+                    }
+                    const objects = entry.objects === null ? new Set<string>() : pages.get(page) ?? new Set<string>();
+                    for (const name of Object.keys(entry.objects ?? {})) objects.add(name);
+                    pages.set(page, objects);
+                }
+            }
+            for (const [page, objects] of pages) {
+                add(page, 'Sayfa', vscode.CompletionItemKind.Module);
+                for (const object of objects) add(object, page, vscode.CompletionItemKind.Field);
             }
         } catch {
             // Maven reports missing or invalid registries during validation.

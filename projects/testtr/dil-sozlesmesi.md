@@ -56,4 +56,8 @@ Blok başlıkları, girdiler ve kapanışlar ayrı satırlardadır. İçe alma v
 | `"Onay" onay kutusu işaretli olmalıdır.` | İşaret kaldırılmış | `expect("checked")` |
 | `"Onay" onay kutusu işaretsiz olmalıdır.` | İşaret duruyor | `expect("unchecked")` |
 
-Registry'de `pages` altında her sayfanın `url` ve `objects` alanları bulunur. Obje için `type` ve boş olmayan `css` alanı kullanılır. Üç hedefin ortak locator türü CSS'tir. Örnek [Registry](example-tests/src/test/registry.json) ve [senaryolar](example-tests/src/test/testtr) aynı yerel ekran üzerinde çalışır.
+Registry'de `pages` altında her sayfanın `url` ve `objects` alanları bulunur. Obje için `type` ve boş olmayan `css` alanı kullanılır. Üç hedefin ortak locator türü CSS'tir.
+
+Registry dizininin doğrudan altındaki `.json` dosyaları birleştirilir. Önce temel dosyalar, ardından `.override.json` dosyaları yüklenir. Her grup dosya adına göre sıralanır. Aynı sayfa birden fazla dosyada yer aldığında iç içe JSON nesneleri alan alan birleştirilir. Çakışan değerlerde son dosya geçerlidir.
+
+Örneğin `giris.override.json` içinde yalnızca bir objenin `css` değeri verilirse temel dosyadaki `url`, obje tipi ve diğer objeler korunur. [Registry örneği](example-tests/src/test/registry) · [Senaryolar](example-tests/src/test/testtr)
