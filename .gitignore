@@ -1,4 +1,4 @@
 **/target/
-**/vscode-extension/node_modules/
-**/vscode-extension/out/
-**/vscode-extension/*.vsix
+/projects/testtr-vscode/node_modules/
+/projects/testtr-vscode/out/
+/projects/testtr-vscode/*.vsix

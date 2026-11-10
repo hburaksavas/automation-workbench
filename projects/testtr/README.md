@@ -4,7 +4,7 @@ Türkçe senaryoları Maven test yaşam döngüsünde Java 17 testlerine dönü�
 
 Desteklenen cümle kalıpları, hata örnekleri ve Java karşılıkları [dil sözleşmesinde](dil-sozlesmesi.md) yer alır.
 
-[VS Code eklentisi](vscode-extension/README.md) adım şablonları, Registry ve ortak adım önerileri, Maven tanıları ve üretilen Java önizlemesi sağlar.
+[VS Code eklentisi](../testtr-vscode/README.md) adım şablonları, Registry ve ortak adım önerileri, Maven tanıları ve üretilen Java önizlemesi sağlar.
 
 ## Çalıştırma
 
