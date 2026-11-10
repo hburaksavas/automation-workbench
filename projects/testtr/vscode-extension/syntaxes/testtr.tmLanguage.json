@@ -1,0 +1,24 @@
+{
+  "scopeName": "source.testtr",
+  "patterns": [
+    {
+      "name": "string.quoted.double.testtr",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.testtr",
+          "match": "\\\\."
+        }
+      ]
+    },
+    {
+      "name": "keyword.control.testtr",
+      "match": "(?:Senaryo:|Senaryo sonu\\.|Ortak adım:|Ortak adım sonu\\.|Ortak adım çağrısı sonu\\.|Her senaryodan (?:önce|sonra):|Hazırlık sonu\\.|Temizlik sonu\\.|Yardımcı işlem çağrısı sonu\\.)"
+    },
+    {
+      "name": "keyword.other.testtr",
+      "match": "\\b(?:olmalıdır|olmamalıdır|yazılır|tıklanır|açılır|seçilir|işaretlenir|kaldırılır|temizlenir|alınır|verilir|uygulanır|kullanılır|çalıştırılır|çıkılır|içermelidir)\\b"
+    }
+  ]
+}

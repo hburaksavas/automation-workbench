@@ -1,0 +1,9 @@
+"ortak/parola.testtr" dosyası kullanılır.
+
+Senaryo: "Ortamdan parola okunur".
+  "TESTTR_DEMO_PASSWORD" sırrı "Gizli parola" değişkenine alınır.
+  "Parolayı doldur" ortak adımı uygulanır:
+    "Parola" girdisine "Gizli parola" değişkeninin değeri verilir.
+  Ortak adım çağrısı sonu.
+  "Parola" alanının değeri "Gizli parola" değişkeninin değeri olmalıdır.
+Senaryo sonu.

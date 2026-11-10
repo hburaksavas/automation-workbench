@@ -1,0 +1,12 @@
+Senaryo: "Ortak davranış sözleşmesi".
+  "Sözleşme" sayfası açılır.
+  "Sözleşme" sayfası açık olmalıdır.
+  "Sözleşme Metni" metni "Türkçe Metin" olmalıdır.
+  "Sözleşme Metni" metni "Metin" ifadesini içermelidir.
+  "Tam Değer" alanının değeri " 123 " olmalıdır.
+  "Olmayan Obje" görünür olmamalıdır.
+  "Gecikmeyi Başlat" düğmesine tıklanır.
+  "Geciken Mesaj" metni "Hazır" olmalıdır.
+  "Geciken Düğme" düğmesi etkin olmalıdır.
+  "Kaldırılan Obje" görünür olmamalıdır.
+Senaryo sonu.

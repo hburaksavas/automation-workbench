@@ -1,0 +1,16 @@
+"ortak/oturum.testtr" dosyası kullanılır.
+
+Senaryo: "Giriş işlemi".
+  Gereksinim: "REQ-GIRIS-001".
+  "Uygulamaya giriş yap" ortak adımı uygulanır:
+    "Kullanıcı adı" girdisine "deneme" verilir.
+  Ortak adım çağrısı sonu.
+  "Mesaj" görünür olmalıdır.
+  "Mesaj" metni "Hoş geldiniz" olmalıdır.
+  "Giriş Yap" düğmesi devre dışı olmalıdır.
+Senaryo sonu.
+
+Her senaryodan sonra:
+  "Giriş" sayfası açılır.
+  "Kullanıcı Adı" alanının değeri "" olmalıdır.
+Temizlik sonu.

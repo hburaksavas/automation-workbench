@@ -1,0 +1,148 @@
+{
+  "senaryo": {
+    "prefix": "senaryo",
+    "body": [
+      "Senaryo: \"${1:Senaryo adı}\".",
+      "  $0",
+      "Senaryo sonu."
+    ]
+  },
+  "hazırlık": {
+    "prefix": "hazırlık",
+    "body": [
+      "Her senaryodan önce:",
+      "  $0",
+      "Hazırlık sonu."
+    ]
+  },
+  "temizlik": {
+    "prefix": "temizlik",
+    "body": [
+      "Her senaryodan sonra:",
+      "  $0",
+      "Temizlik sonu."
+    ]
+  },
+  "ortak-tanım": {
+    "prefix": "ortak-tanım",
+    "body": [
+      "Ortak adım: \"${1:Ad}\".",
+      "  \"${2:Girdi}\" adlı metin alınır.",
+      "  $0",
+      "Ortak adım sonu."
+    ]
+  },
+  "ortak-çağrı": {
+    "prefix": "ortak-çağrı",
+    "body": [
+      "\"${1:Ad}\" ortak adımı uygulanır:",
+      "  \"${2:Girdi}\" girdisine \"${3:Değer}\" verilir.",
+      "Ortak adım çağrısı sonu."
+    ]
+  },
+  "yardımcı-işlem": {
+    "prefix": "yardımcı-işlem",
+    "body": [
+      "\"${1:İşlem}\" yardımcı işlemi çalıştırılır:",
+      "  \"${2:Girdi}\" girdisine \"${3:Değer}\" verilir.",
+      "  Sonuç \"${4:Sonuç}\" değişkenine alınır.",
+      "Yardımcı işlem çağrısı sonu."
+    ]
+  },
+  "içe-al": {
+    "prefix": "içe-al",
+    "body": "\"${1:ortak/oturum.testtr}\" dosyası kullanılır."
+  },
+  "sayfa-aç": {
+    "prefix": "sayfa-aç",
+    "body": "\"${1:Sayfa}\" sayfası açılır."
+  },
+  "sayfa-doğrula": {
+    "prefix": "sayfa-doğrula",
+    "body": "\"${1:Sayfa}\" sayfası açık olmalıdır."
+  },
+  "tıkla": {
+    "prefix": "tıkla",
+    "body": "\"${1:Düğme}\" düğmesine tıklanır."
+  },
+  "doldur": {
+    "prefix": "doldur",
+    "body": "\"${1:Alan}\" alanına \"${2:Değer}\" yazılır."
+  },
+  "temizle": {
+    "prefix": "temizle",
+    "body": "\"${1:Alan}\" alanı temizlenir."
+  },
+  "sekme": {
+    "prefix": "sekme",
+    "body": "\"${1:Alan}\" alanından sekme tuşuyla çıkılır."
+  },
+  "seç": {
+    "prefix": "seç",
+    "body": "\"${1:Liste}\" listesinden \"${2:Seçenek}\" seçilir."
+  },
+  "işaretle": {
+    "prefix": "işaretle",
+    "body": "\"${1:Onay}\" onay kutusu işaretlenir."
+  },
+  "işareti-kaldır": {
+    "prefix": "işareti-kaldır",
+    "body": "\"${1:Onay}\" onay kutusunun işareti kaldırılır."
+  },
+  "metin": {
+    "prefix": "metin",
+    "body": "\"${1:Obje}\" metni \"${2:Beklenen}\" olmalıdır."
+  },
+  "içerir": {
+    "prefix": "içerir",
+    "body": "\"${1:Obje}\" metni \"${2:Beklenen}\" ifadesini içermelidir."
+  },
+  "değer": {
+    "prefix": "değer",
+    "body": "\"${1:Alan}\" alanının değeri \"${2:Beklenen}\" olmalıdır."
+  },
+  "değeri-oku": {
+    "prefix": "değeri-oku",
+    "body": "\"${1:Alan}\" alanının değeri \"${2:Değişken}\" değişkenine alınır."
+  },
+  "boş": {
+    "prefix": "boş",
+    "body": "\"${1:Alan}\" alanı boş olmalıdır."
+  },
+  "görünür": {
+    "prefix": "görünür",
+    "body": "\"${1:Obje}\" görünür olmalıdır."
+  },
+  "gizli": {
+    "prefix": "gizli",
+    "body": "\"${1:Obje}\" görünür olmamalıdır."
+  },
+  "etkin": {
+    "prefix": "etkin",
+    "body": "\"${1:Düğme}\" düğmesi etkin olmalıdır."
+  },
+  "devre-dışı": {
+    "prefix": "devre-dışı",
+    "body": "\"${1:Düğme}\" düğmesi devre dışı olmalıdır."
+  },
+  "seçili": {
+    "prefix": "seçili",
+    "body": "\"${1:Liste}\" listesinde \"${2:Seçenek}\" seçili olmalıdır."
+  },
+  "işaretli": {
+    "prefix": "işaretli",
+    "body": "\"${1:Onay}\" onay kutusu işaretli olmalıdır."
+  },
+  "işaretsiz": {
+    "prefix": "işaretsiz",
+    "body": "\"${1:Onay}\" onay kutusu işaretsiz olmalıdır."
+  },
+  "ayar": {
+    "prefix": "ayar",
+    "body": "\"${1:Sistem özelliği}\" ayarı \"${2:Değişken}\" değişkenine alınır."
+  },
+  "sır": {
+    "prefix": "sır",
+    "body": "\"${1:Ortam değişkeni}\" sırrı \"${2:Değişken}\" değişkenine alınır."
+  }
+}

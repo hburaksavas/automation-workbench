@@ -1,0 +1,19 @@
+Senaryo: "Alan ve seçim işlemleri".
+  "Giriş" sayfası açılır.
+  "Giriş Yap" düğmesi etkin olmalıdır.
+  "Kullanıcı Adı" alanına "Geçici" yazılır.
+  "Kullanıcı Adı" alanı temizlenir.
+  "Kullanıcı Adı" alanı boş olmalıdır.
+  "Kullanıcı Adı" alanından sekme tuşuyla çıkılır.
+  "Para Birimi" listesinden "Avro" seçilir.
+  "Para Birimi" listesinde "Avro" seçili olmalıdır.
+  "Onay" onay kutusu işaretlenir.
+  "Onay" onay kutusu işaretlenir.
+  "Onay" onay kutusu işaretli olmalıdır.
+  "Onay" onay kutusunun işareti kaldırılır.
+  "Onay" onay kutusunun işareti kaldırılır.
+  "Onay" onay kutusu işaretsiz olmalıdır.
+  "Gizli Mesaj" görünür olmamalıdır.
+  "Giriş Yap" düğmesine tıklanır.
+  "Mesaj" metni "geldiniz" ifadesini içermelidir.
+Senaryo sonu.

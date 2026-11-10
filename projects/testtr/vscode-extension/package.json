@@ -1,0 +1,126 @@
+{
+  "name": "testtr",
+  "displayName": "TestTR",
+  "description": "Türkçe UI test senaryoları için VS Code desteği",
+  "version": "0.1.0",
+  "publisher": "testtr",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Testing"
+  ],
+  "main": "./out/extension.js",
+  "scripts": {
+    "compile": "tsc -p .",
+    "vscode:prepublish": "npm run compile"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    },
+    "virtualWorkspaces": false
+  },
+  "contributes": {
+    "taskDefinitions": [
+      {
+        "type": "testtr",
+        "required": ["action"],
+        "properties": {
+          "action": { "type": "string" }
+        }
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "testtr-dsl",
+        "owner": "testtr",
+        "source": "TestTR",
+        "severity": "error",
+        "fileLocation": ["search", { "include": ["${workspaceFolder}"] }],
+        "pattern": {
+          "regexp": "^.*?\\[ERROR\\].*? on project [^:]+: ((?:[A-Za-z]:)?[^\\r\\n:]+\\.testtr):(\\d+)(?: → .*?)? \\[DSL\\] (.+?)(?: -> \\[Help \\d+\\])?\\s*$",
+          "file": 1,
+          "line": 2,
+          "message": 3
+        }
+      }
+    ],
+    "languages": [
+      {
+        "id": "testtr",
+        "aliases": [
+          "TestTR"
+        ],
+        "extensions": [
+          ".testtr"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "testtr",
+        "scopeName": "source.testtr",
+        "path": "./syntaxes/testtr.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "testtr",
+        "path": "./snippets/testtr.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "testtr.validate",
+        "title": "TestTR: Senaryoları doğrula"
+      },
+      {
+        "command": "testtr.preview",
+        "title": "TestTR: Üretilen Java kodunu aç"
+      },
+      {
+        "command": "testtr.test",
+        "title": "TestTR: Maven testlerini çalıştır"
+      }
+    ],
+    "configuration": {
+      "title": "TestTR",
+      "properties": {
+        "testtr.profile": {
+          "type": "string",
+          "enum": [
+            "default",
+            "selenide",
+            "selenium",
+            "playwright"
+          ],
+          "default": "default",
+          "description": "Maven profili. default seçili POM ayarını kullanır."
+        },
+        "testtr.sourceDirectory": {
+          "type": "string",
+          "default": "src/test/testtr",
+          "description": "Test modülüne göre dosya veya dizin yolu."
+        },
+        "testtr.registry": {
+          "type": "string",
+          "default": "src/test/registry.json",
+          "description": "Test modülüne göre dosya veya dizin yolu."
+        },
+        "testtr.generatedDirectory": {
+          "type": "string",
+          "default": "target/generated-test-sources/testtr/dev/testtr/generated",
+          "description": "Test modülüne göre dosya veya dizin yolu."
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "@types/vscode": "1.95.0",
+    "typescript": "5.8.3"
+  }
+}

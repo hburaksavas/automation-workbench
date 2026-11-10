@@ -1,0 +1,20 @@
+<!doctype html><html lang="tr"><meta charset="utf-8"><title>TestTR</title>
+<label>Kullanıcı adı <input id="username"></label>
+<label>Parola <input type="password" id="password"></label>
+<button id="login" onclick="document.querySelector('#message').textContent='Hoş geldiniz';this.disabled=true">Giriş Yap</button>
+<p id="message"></p>
+<label>Para Birimi <select id="currency"><option>Türk Lirası</option><option>Avro</option></select></label>
+<label><input type="checkbox" id="consent">Onay</label>
+<p id="hidden" hidden>Gizli</p>
+<p id="contract-text" style="white-space:pre-line">
+  Türkçe
+    Metin&nbsp;
+</p>
+<input id="exact-value" value=" 123 ">
+<button id="delayed-start" onclick="setTimeout(() => { document.querySelector('#late-message').textContent='Hazır'; document.querySelector('#late-button').disabled=false; document.querySelector('#removed').remove(); }, 300)">Başlat</button>
+<p id="late-message"></p>
+<button id="late-button" disabled>Bekleyen</button>
+<p id="removed">Kaldırılacak</p>
+<p class="duplicate" hidden>Bir</p><p class="duplicate" hidden>İki</p>
+<select id="duplicate-options"><option>Tekrar</option><option>Tekrar</option></select>
+</html>

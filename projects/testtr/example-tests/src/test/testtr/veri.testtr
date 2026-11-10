@@ -1,0 +1,23 @@
+"ortak/oturum.testtr" dosyası kullanılır.
+
+Her senaryodan önce:
+  "testtr.demo.user" ayarı "Kullanıcı" değişkenine alınır.
+  "Uygulamaya giriş yap" ortak adımı uygulanır:
+    "Kullanıcı adı" girdisine "Kullanıcı" değişkeninin değeri verilir.
+  Ortak adım çağrısı sonu.
+  "Test müşterisi oluştur" yardımcı işlemi çalıştırılır:
+    "Müşteri türü" girdisine "Bireysel" verilir.
+    Sonuç "Müşteri numarası" değişkenine alınır.
+  Yardımcı işlem çağrısı sonu.
+Hazırlık sonu.
+
+Senaryo: "Çalışma zamanı verisi".
+  "Kullanıcı Adı" alanına "Müşteri numarası" değişkeninin değeri yazılır.
+  "Kullanıcı Adı" alanının değeri "Okunan numara" değişkenine alınır.
+  "Kullanıcı Adı" alanının değeri "Okunan numara" değişkeninin değeri olmalıdır.
+  "Kullanıcı Adı" alanının değeri "Müşteri numarası" değişkeninin değeri olmalıdır.
+Senaryo sonu.
+
+Her senaryodan sonra:
+  "Koşum verisini temizle" yardımcı işlemi çalıştırılır.
+Temizlik sonu.

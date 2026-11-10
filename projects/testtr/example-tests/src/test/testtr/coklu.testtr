@@ -1,0 +1,34 @@
+"ortak/oturum.testtr" dosyası kullanılır.
+
+Ortak adım: "Hazır oturum aç".
+  "testtr.demo.user" ayarı "Yerel kullanıcı" değişkenine alınır.
+  "Uygulamaya giriş yap" ortak adımı uygulanır:
+    "Kullanıcı adı" girdisine "Yerel kullanıcı" değişkeninin değeri verilir.
+  Ortak adım çağrısı sonu.
+Ortak adım sonu.
+
+Her senaryodan önce:
+  "Hazır oturum aç" ortak adımı uygulanır.
+  "Test müşterisi oluştur" yardımcı işlemi çalıştırılır:
+    "Müşteri türü" girdisine "Bireysel" verilir.
+    Sonuç "Müşteri" değişkenine alınır.
+  Yardımcı işlem çağrısı sonu.
+Hazırlık sonu.
+
+Senaryo: "İlk müşteri".
+  "Kullanıcı Adı" alanının değeri "deneme" olmalıdır.
+  "Kullanıcı Adı" alanına "Müşteri" değişkeninin değeri yazılır.
+  "Kullanıcı Adı" alanının değeri "Okunan" değişkenine alınır.
+  "Kullanıcı Adı" alanının değeri "Okunan" değişkeninin değeri olmalıdır.
+Senaryo sonu.
+
+Senaryo: "İkinci müşteri".
+  "Kullanıcı Adı" alanının değeri "deneme" olmalıdır.
+  "Kullanıcı Adı" alanına "Müşteri" değişkeninin değeri yazılır.
+  "Kullanıcı Adı" alanının değeri "Okunan" değişkenine alınır.
+  "Kullanıcı Adı" alanının değeri "Okunan" değişkeninin değeri olmalıdır.
+Senaryo sonu.
+
+Her senaryodan sonra:
+  "Koşum verisini temizle" yardımcı işlemi çalıştırılır.
+Temizlik sonu.

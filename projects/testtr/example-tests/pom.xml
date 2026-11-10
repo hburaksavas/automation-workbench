@@ -1,0 +1,23 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
+<parent><groupId>dev.testtr</groupId><artifactId>testtr-parent</artifactId><version>0.1.0-SNAPSHOT</version></parent><artifactId>example-tests</artifactId>
+<properties><testtr.framework>SELENIDE</testtr.framework></properties>
+<dependencies>
+<dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.11.4</version><scope>test</scope></dependency>
+<dependency><groupId>dev.testtr</groupId><artifactId>runner-support</artifactId><version>${project.version}</version><scope>test</scope></dependency>
+</dependencies>
+<build><plugins>
+<plugin><groupId>dev.testtr</groupId><artifactId>testtr-maven-plugin</artifactId><version>${project.version}</version><executions><execution><goals><goal>generate</goal></goals></execution></executions></plugin>
+<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId>
+<configuration>
+<systemPropertyVariables>
+<testtr.baseUrl>file:///${project.basedir}/src/test/resources/</testtr.baseUrl>
+<testtr.demo.user>deneme</testtr.demo.user>
+</systemPropertyVariables>
+<environmentVariables><TESTTR_DEMO_PASSWORD>fixture-password-only</TESTTR_DEMO_PASSWORD></environmentVariables>
+</configuration></plugin>
+</plugins></build>
+<profiles>
+<profile><id>selenide</id><activation><activeByDefault>true</activeByDefault></activation><dependencies><dependency><groupId>com.codeborne</groupId><artifactId>selenide</artifactId><version>7.7.3</version><scope>test</scope></dependency></dependencies></profile>
+<profile><id>selenium</id><properties><testtr.framework>SELENIUM</testtr.framework></properties><dependencies><dependency><groupId>org.seleniumhq.selenium</groupId><artifactId>selenium-java</artifactId><version>4.29.0</version><scope>test</scope></dependency></dependencies></profile>
+<profile><id>playwright</id><properties><testtr.framework>PLAYWRIGHT</testtr.framework></properties><dependencies><dependency><groupId>com.microsoft.playwright</groupId><artifactId>playwright</artifactId><version>1.51.0</version><scope>test</scope></dependency></dependencies></profile>
+</profiles></project>

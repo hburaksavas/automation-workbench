@@ -1,0 +1,12 @@
+{
+  "Test müşterisi oluştur": {
+    "method": "dev.testtr.FixtureHelpers.createCustomer",
+    "inputs": {"Müşteri türü": "text"},
+    "result": "text"
+  },
+  "Koşum verisini temizle": {
+    "method": "dev.testtr.FixtureHelpers.cleanup",
+    "inputs": {},
+    "result": "void"
+  }
+}

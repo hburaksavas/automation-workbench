@@ -1,0 +1,7 @@
+Ortak adım: "Uygulamaya giriş yap".
+  "Kullanıcı adı" adlı metin alınır.
+  "Giriş" sayfası açılır.
+  "Kullanıcı Adı" alanına "Kullanıcı adı" değişkeninin değeri yazılır.
+  "Kullanıcı Adı" alanının değeri "Kullanıcı adı" değişkeninin değeri olmalıdır.
+  "Giriş Yap" düğmesine tıklanır.
+Ortak adım sonu.

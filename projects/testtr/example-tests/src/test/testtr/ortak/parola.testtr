@@ -1,0 +1,5 @@
+Ortak adım: "Parolayı doldur".
+  "Parola" adlı gizli değer alınır.
+  "Giriş" sayfası açılır.
+  "Parola" alanına "Parola" değişkeninin değeri yazılır.
+Ortak adım sonu.
