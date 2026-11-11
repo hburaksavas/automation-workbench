@@ -2,6 +2,7 @@ package dev.testtr.maven;
 
 import dev.testtr.ScenarioCompiler;
 import dev.testtr.ObjectRegistry;
+import dev.testtr.RequirementCatalog;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +27,8 @@ public final class GenerateMojo extends AbstractMojo {
     private File registry;
     @Parameter(defaultValue = "${project.basedir}/src/test/helpers.json")
     private File helpers;
+    @Parameter(property = "testtr.requirements")
+    private File requirements;
     @Parameter(defaultValue = "SELENIDE", property = "testtr.framework")
     private String framework;
     @Parameter(defaultValue = "${plugin}", readonly = true, required = true)
@@ -38,6 +41,10 @@ public final class GenerateMojo extends AbstractMojo {
             var target = ScenarioCompiler.Target.valueOf(framework.toUpperCase(Locale.ROOT));
             var compiler = new ScenarioCompiler();
             var generated = new LinkedHashMap<String, String>();
+            Path requirementsPath = requirements == null
+                    ? project.getBasedir().toPath().resolve("src/test/requirements.json") : requirements.toPath();
+            RequirementCatalog catalog = requirements != null || Files.exists(requirementsPath)
+                    ? RequirementCatalog.load(requirementsPath) : null;
             if (sourceDirectory.isDirectory()) {
                 try (var paths = Files.walk(sourceDirectory.toPath())) {
                     var sources = paths.filter(p -> p.toString().endsWith(".testtr")).sorted().toList();
@@ -59,11 +66,13 @@ public final class GenerateMojo extends AbstractMojo {
                     }
                     for (Path source : sources) {
                         String relative = sourceDirectory.toPath().relativize(source).toString().replace('\\', '/');
-                        for (var scenario : compiler.parseAll(source, objects, helpers.toPath())) {
+                        for (var scenario : compiler.parseAll(source, objects, helpers.toPath(), catalog)) {
                             String identity = relative + "\n" + scenario.name();
                             String id = sha256(identity.getBytes(StandardCharsets.UTF_8));
                             String name = "Scenario_" + id + "Test";
-                            generated.put(name + ".java", compiler.generate(scenario, relative, name, target, metadata));
+                            var scenarioMetadata = new LinkedHashMap<>(metadata);
+                            if (catalog != null) scenarioMetadata.putAll(catalog.metadata(scenario.requirement(), relative));
+                            generated.put(name + ".java", compiler.generate(scenario, relative, name, target, scenarioMetadata));
                         }
                     }
                 }

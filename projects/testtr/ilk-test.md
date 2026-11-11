@@ -150,3 +150,7 @@ $baseUrl = ([uri]($resources + [IO.Path]::DirectorySeparatorChar)).AbsoluteUri
 Maven çıktısında `Tests run: 1, Failures: 0, Errors: 0, Skipped: 0` ve `BUILD SUCCESS` görünür. Java kodu `target/generated-test-sources/testtr/`, JUnit XML raporu `target/surefire-reports/` dizinindedir.
 
 Hata raporunu görmek için senaryodaki beklenen metni `"Farklı mesaj"` olarak değiştirip aynı komutu yeniden çalıştır. Surefire hatayı `ilk-test.testtr:3` konumunda gösterir. Beklenen metni geri yüklediğinde test yeniden geçer.
+
+## Rehberin otomatik doğrulaması
+
+Depo kökünde PowerShell 7 ile `./.github/scripts/verify-first-test.ps1` çalıştırılabilir. Betik bu belgedeki POM, HTML, Registry ve senaryo örneklerini `target/first-test-<kimlik>/` altında bağımsız bir Maven projesine aktarır. Bileşenleri kurar; başarılı testi, yanlış beklenen metnin kaynak satırıyla hata vermesini ve metin geri yüklendiğinde testin yeniden geçmesini doğrular. Koşum günlükleri ve beklenen hata raporu aynı dizinde saklanır. GitHub Actions bu kontrolü Windows ve Ubuntu için çalıştıracak şekilde yapılandırılmıştır.

@@ -44,18 +44,22 @@ public final class ScenarioCompiler {
     }
 
     public List<Scenario> parseAll(Path source, ObjectRegistry registry, Path helpersPath) throws IOException {
+        return parseAll(source, registry, helpersPath, null);
+    }
+
+    public List<Scenario> parseAll(Path source, ObjectRegistry registry, Path helpersPath, RequirementCatalog requirements) throws IOException {
         JsonNode helpers = Files.exists(helpersPath) ? json.readTree(helpersPath.toFile()) : json.createObjectNode();
         List<Scenario> result = new ArrayList<>();
         var names = new java.util.HashSet<String>();
         for (var lines : ScenarioSource.readAll(source)) {
-            Scenario scenario = parseScenario(source, lines, registry, helpers);
+            Scenario scenario = parseScenario(source, lines, registry, helpers, requirements);
             if (!names.add(scenario.name())) throw error(lines.get(0).location(), "Tekrarlı senaryo adı: " + scenario.name());
             result.add(scenario);
         }
         return List.copyOf(result);
     }
 
-    private Scenario parseScenario(Path source, List<ScenarioSource.Line> lines, ObjectRegistry registry, JsonNode helpers) throws IOException {
+    private Scenario parseScenario(Path source, List<ScenarioSource.Line> lines, ObjectRegistry registry, JsonNode helpers, RequirementCatalog requirements) throws IOException {
         Map<String, Boolean> variables = new LinkedHashMap<>();
         String name = null;
         String requirement = "";
@@ -100,6 +104,7 @@ public final class ScenarioCompiler {
                         || arguments.get(0).isBlank() || current.control() != ScenarioSource.Control.REQUIREMENT)
                     throw error(location, "Gereksinim, senaryo başlığından hemen sonra ve bir kez yazılmalıdır.");
                 requirement = arguments.get(0);
+                if (requirements != null) requirements.metadata(requirement, location);
                 continue;
             }
             if (syntax.equals("Senaryo sonu.")) { ended = true; continue; }

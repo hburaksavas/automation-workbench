@@ -4,6 +4,10 @@ Türkçe senaryoları Maven test yaşam döngüsünde Java 17 testlerine dönü�
 
 Desteklenen cümle kalıpları, hata örnekleri ve Java karşılıkları [dil sözleşmesinde](dil-sozlesmesi.md) yer alır.
 
+İsteğe bağlı [gereksinim kataloğu](gereksinimler.md), senaryo bağlantılarını onay durumuyla doğrular ve gereksinim sürümünü JUnit raporuna taşır.
+
+[AI taslak üretimi](ai-taslaklar.md), `testtr:draft` Maven hedefiyle onaylı gereksinimlerden ayrı inceleme dosyaları üretir ve mevcut derleyiciyle doğrular.
+
 [VS Code eklentisi](../testtr-vscode/README.md) adım şablonları, Registry ve ortak adım önerileri, Maven tanıları ve üretilen Java önizlemesi sağlar.
 
 ## Çalıştırma
@@ -118,9 +122,13 @@ Yardımcı işlem çağrısı sonu.
 
 ## Doğrulama
 
+AI taslak akışı eklendikten sonraki Windows Selenide `clean verify` koşumunda 45 test geçti: 24 derleyici/katalog/taslak testi, 3 API istemcisi testi, 10 koşum desteği testi ve örnek modüldeki 8 test. API istemcisi yerel HTTP sunucusuyla sınandı; canlı model çağrısı yapılmadı. Çevrimdışı Maven kabul kontrolü bağımsız projede taslak üretimini, kaynak izolasyonunu ve sabit kabul örneğinin Chrome'da başarılı koşumunu doğruladı.
+
+Gereksinim kataloğu eklendikten sonraki Windows doğrulamasında Selenide `clean verify` ile 36 test geçti: 18 derleyici/katalog testi, 10 koşum desteği testi ve örnek modüldeki 8 test. Onaysız gereksinimle Maven koşumu `giris.testtr:4 [DSL]` tanısıyla kaynak üretiminde durdu. Başarılı koşumun JUnit kaydında gereksinim sürümü ve katalog SHA-256 özeti doğrulandı.
+
 JDK 17.0.18 ve yerel Chrome ile Maven profilleri doğrulanır. Tarayıcı senaryoları ortak giriş ve hazırlık/temizlik akışını, alan işlemlerini, çalışma zamanı verisini ve sır aktarımını kapsar. Derleyici testleri girdileri, döngüleri, türleri ve kaynak konumlarını doğrular. Koşum desteği testleri senaryo izolasyonunu ve hata zincirinde sır gizlemeyi sınar.
 
-Son Windows doğrulamasında Selenide, Selenium ve Playwright profillerinin her birinde `clean verify` ile 32 test geçti. Bu sayı yedi tarayıcı senaryosunu, mevcut Java birim testini, 14 derleyici testini ve 10 koşum desteği testini kapsar. Önceki Playwright doğrulamasında çoklu dosyanın ilk senaryosu kasıtlı bozulduğunda ikinci senaryo geçti ve koşum verisi temizlendi. İlk senaryo dosyadan çıkarıldığında sonraki Maven koşumu başarılı oldu ve eski Java kaynak/sınıf dosyaları clean gerektirmeden kaldırıldı.
+Son Windows doğrulamasında Selenide, Selenium ve Playwright profillerinin her birinde `clean verify` ile 33 test geçti. Bu sayı yedi tarayıcı senaryosunu, mevcut Java birim testini, 15 derleyici testini ve 10 koşum desteği testini kapsar. Önceki Playwright doğrulamasında çoklu dosyanın ilk senaryosu kasıtlı bozulduğunda ikinci senaryo geçti ve koşum verisi temizlendi. İlk senaryo dosyadan çıkarıldığında sonraki Maven koşumu başarılı oldu ve eski Java kaynak/sınıf dosyaları clean gerektirmeden kaldırıldı.
 
 Önceki parola ve test verisi hata kontrollerinde Maven başarısız oldu, koşum verisi temizlendi ve üretilen Java ile Surefire raporlarında deneme parolası bulunmadı.
 

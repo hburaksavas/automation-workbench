@@ -81,4 +81,5 @@ public final class ObjectRegistry {
 
     JsonNode page(String name) { return pages.path(name); }
     public String sha256() { return sha256; }
+    public JsonNode snapshot() { return pages.deepCopy(); }
 }

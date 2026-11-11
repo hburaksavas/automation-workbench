@@ -155,13 +155,30 @@ Windows'ta CI için kullanılan Maven komutları ve XML dışa aktarımı üç p
 
 ## Faz 4 — AI ile gereksinimden senaryo üretimi
 
+İlk altyapı adımı uygulandı: isteğe bağlı `requirements.json` kataloğu kimlik, sürüm, onay durumu ve gereksinim metnini alır. Maven bilinmeyen veya onaylanmamış senaryo bağlantılarını kaynak satırında reddeder; onaylı bağlantının sürümünü ve katalog özetini JUnit kaydına taşır. Ayrıntılar `gereksinimler.md` içindedir. AI öneri akışının güncel durumu aşağıdadır. Ubuntu doğrulaması sonraya bırakıldı.
+
+`testtr:draft` ile ilk AI öneri akışı eklendi: Responses API'ye onaylı gereksinimler, Registry ve mevcut senaryolar verilir; yapılandırılmış taslaklar mevcut derleyicide doğrulanır, sınırlı düzeltme denemesi yapılır ve belirsizlikler inceleme listesine ayrılır. Taslaklar ayrı dizinde kalır; normal test kaynaklarına otomatik alınmaz. Çevrimdışı kabul akışı bağımsız tüketici projede örnek taslağı tarayıcıda çalıştırır. Canlı model çağrısı ve gerçek gereksinimlerle kapsam kalitesi henüz doğrulanmadığından Faz 4 kabulü tamamlanmış sayılmaz. Ayrıntılar `ai-taslaklar.md` içindedir.
+
 - [ ] Onaylı gereksinimleri kimlik ve sürümüyle al. AI, mevcut senaryoları dikkate alarak eksik pozitif, negatif ve sınır durumları için Türkçe senaryo taslakları üretir.
 - [ ] Her beklenen sonucu bir gereksinim veya kullanıcı onayına bağla. Çelişkili gereksinimleri ve tanımsız adımları inceleme kuyruğuna ayır.
 - [ ] Taslakları mevcut derleyiciye ver. Derleme tanılarıyla sınırlı düzeltme denemeleri yap, ardından Maven ile çalıştır ve farkı incelemeye sun.
 
 **Kabul ölçütü.** Bir gereksinim değişikliğinden izlenebilir, derlenebilir ve çalıştırılmış bir senaryo önerisi çıkar. Çalışan UI ile gereksinim çelişirse rapor bu farkı gösterir.
 
-## Faz 5 — Değişiklik etkisi ve otomatik obje keşfi
+## Faz 5 — Mevcut Maven projelerine mevcut testleri koruyarak entegrasyon
+
+**Amaç.** TestTR, kurumun Gherkin/Cucumber ve Java testlerini barındıran Maven projesine isteğe bağlı bir katman olarak eklenir. Geçiş senaryo bazında yapılır; mevcut testlerin topluca dönüştürülmesi veya giriş altyapısının yeniden yazılması gerekmez. Canlı AI ve Ubuntu doğrulamaları ertelenmişken sıradaki geliştirme önceliği bu fazdır.
+
+- [ ] Mevcut projenin POM'unu, Cucumber runner'larını, hook'larını, tarayıcı/oturum yönetimini, giriş kodunu, test verisi hazırlığını ve raporlama akışını incele. TestTR eklenmeden önce mevcut Maven komutlarıyla test seçimini ve sonuçlarını başlangıç kaydı olarak sakla.
+- [ ] TestTR kaynak üretimini ayrı ve açıkça etkinleştirilen bir Maven profiline bağla. `.feature` ve elle yazılmış Java kaynaklarını koru; `.testtr` dosyalarını ayrı dizinde, üretilen Java'yı yalnızca `target/` altında tut. Mevcut Surefire/Failsafe ve Cucumber test seçimini, bağımlılık sürümlerini ve normal CI komutlarını koruyacak yapılandırmayı doğrula.
+- [ ] Kurumun tarayıcı ve giriş altyapısına bağlanan bir Java adaptör sözleşmesi geliştir. Tarayıcı oturumunun oluşturulması, giriş yapılması, kullanılması ve kapatılmasının hangi katmana ait olduğunu açıkça belirle. Dışarıdan sağlanan oturumu TestTR'nin yeniden açmasını veya izinsiz kapatmasını engelle; senaryo izolasyonunu ve paralel koşum davranışını tanımla. Mevcut bağımsız TestTR tarayıcı yönetimi de kullanılabilir kalsın.
+- [ ] Mevcut Java işlemlerini TestTR adımlarıyla eşle. Cucumber hook'larının üretilen JUnit testlerinde kendiliğinden çalışmadığını dikkate al; ortak giriş/hazırlık/temizlik servisleri varsa bunlara bağlan. Kod yalnızca hook içindeyse davranışını mevcut Cucumber testleriyle doğrulayarak ortak servise çıkar. Sır yönetimini, başarısız hazırlıkta temizliği ve birincil hatanın korunmasını sürdür.
+- [ ] Bir `.feature` senaryosunu pilot olarak `.testtr` biçimine dönüştür. Aynı ortam, test verisi, kurumun giriş akışı ve aynı tarayıcı oturumuyla işlemleri ve doğrulamaları karşılaştır. Pilot doğrulanana kadar mevcut senaryoyu koru; eşdeğer iki senaryonun aynı koşumda iki kez çalışmasını açık test seçimiyle yönet.
+- [ ] TestTR kapalı, yalnızca mevcut testler, yalnızca pilot TestTR testi ve birlikte koşum durumlarını doğrula. Desteklenen JDK, JUnit, Cucumber ve tarayıcı kütüphanesi sürümlerini belgeleyip profil kapatılarak eski akışa dönüşü göster. Entegrasyon ve aşamalı geçiş rehberini örnek POM ve adaptörle teslim et.
+
+**Kabul ölçütü.** TestTR profili kapalıyken mevcut test komutları, seçilen testler ve davranışlar başlangıç kaydıyla aynı kalır. Profil açıkken pilot TestTR senaryosu kurumun mevcut giriş ve tarayıcı altyapısıyla başarılı çalışır; mevcut Gherkin ve Java testleri de çalışmaya devam eder. Beklenmeyen ek tarayıcı oturumu, mükerrer senaryo koşumu veya başka bir senaryoya ait oturumun kapatılması oluşmaz. Pilotun hatası kendi Türkçe kaynak satırına bağlanır ve mevcut raporlama akışı korunur.
+
+## Faz 6 — Değişiklik etkisi ve otomatik obje keşfi
 
 - [ ] React diff'i ile route, bileşen, Registry ve mevcut testler arasındaki bağlantıları çıkar. Önce ilgili testleri çalıştır, kapsam boşluğu varsa Faz 4'ü tetikle. Etki belirsizse daha geniş test kümesine dön.
 - [ ] React kaynağından ve canlı UI'dan Registry adayları çıkar. Locator'ı hedef sayfa ve kapsamda tarayıcıyla doğrula. İlk aşamada değişikliği diff olarak sun.
@@ -169,7 +186,7 @@ Windows'ta CI için kullanılan Maven komutları ve XML dışa aktarımı üç p
 
 **Kabul ölçütü.** Bir PR değişikliğinden etkilenen testler, varsa eksik senaryo ve doğrulanmış Registry adayı gerekçeleriyle üretilir.
 
-## Faz 6 — Hata analizi ve kontrollü bakım
+## Faz 7 — Hata analizi ve kontrollü bakım
 
 - [ ] Koşum hatalarını uygulama davranışı, locator, veri, ortam ve kararsız koşum olarak sınıflandır. Kanıt yetersizse sonucu belirsiz olarak işaretle.
 - [ ] Locator değişikliğini sınırlı kapsamda öner ve etkilenen testleri yeniden çalıştır. İş kuralına ait doğrulamayı ve beklenen değeri koru. Ürün davranışıyla gereksinim arasındaki farkı hata olarak raporla.
@@ -177,7 +194,7 @@ Windows'ta CI için kullanılan Maven komutları ve XML dışa aktarımı üç p
 
 **Kabul ölçütü.** Kontrollü locator değişikliği Registry güncellemesiyle giderilir. Kontrollü iş kuralı ihlalinde doğrulama başarısız kalır ve doğru bulgu raporlanır.
 
-## Faz 7 — Otonom orkestrasyon
+## Faz 8 — Otonom orkestrasyon
 
 - [ ] Gereksinim ve PR olaylarını tek iş akışına bağla. Her işin durumunu, girdi sürümlerini ve kararlarını kaydet. Aynı olay tekrar geldiğinde mükerrer öneri veya PR üretme.
 - [ ] Aşamaları yeniden denenebilir kıl. Deneme ve model bütçesi, koşum zaman aşımı ve yetkileri proje bazında sınırla. Çelişki, yetki dışı işlem veya belirsiz eşleşmeyi incelemeye yönlendir.

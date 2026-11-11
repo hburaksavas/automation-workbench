@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "requirements": [
+    {
+      "id": "REQ-GIRIS-001",
+      "version": "1",
+      "status": "approved",
+      "text": "Geçerli kullanıcıyla giriş yapıldığında Hoş geldiniz mesajı görünür ve Giriş Yap düğmesi devre dışı olur."
+    }
+  ]
+}
