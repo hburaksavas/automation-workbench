@@ -165,9 +165,39 @@ Windows'ta CI için kullanılan Maven komutları ve XML dışa aktarımı üç p
 
 **Kabul ölçütü.** Bir gereksinim değişikliğinden izlenebilir, derlenebilir ve çalıştırılmış bir senaryo önerisi çıkar. Çalışan UI ile gereksinim çelişirse rapor bu farkı gösterir.
 
-## Faz 5 — Mevcut Maven projelerine mevcut testleri koruyarak entegrasyon
+## Faz 5 — Değişiklik etkisi ve otomatik obje keşfi
 
-**Amaç.** TestTR, kurumun Gherkin/Cucumber ve Java testlerini barındıran Maven projesine isteğe bağlı bir katman olarak eklenir. Geçiş senaryo bazında yapılır; mevcut testlerin topluca dönüştürülmesi veya giriş altyapısının yeniden yazılması gerekmez. Canlı AI ve Ubuntu doğrulamaları ertelenmişken sıradaki geliştirme önceliği bu fazdır.
+İlk sürüm uygulandı: `testtr:impact` temel Git revizyonundan mevcut çalışma ağacına değişiklikleri alır; dosya kalıplarıyla sayfa eşlemesi, ortak adım çağrı zincirleri ve yaşam döngüsü adımları üzerinden gerekçeli senaryo listesi üretir. `.js`, `.jsx`, `.ts`, `.tsx` veya başka uzantılar desteklenir. Ortak girdiler ve belirsiz değişiklikler tüm TestTR senaryolarını seçtirir. Otomatik Registry keşfi henüz uygulanmadığından faz tamamlanmış sayılmaz. Ayrıntılar `etki-analizi.md` içindedir.
+
+Seçilen testlerin koşumu eklendi: tek test modülünde `testtr:select test`, güncel etki raporundaki senaryoları aynı Maven oturumunda Surefire'a aktarır. Boş seçim testleri atlar; geniş seçim tüm TestTR senaryolarını çalıştırır. Elle yazılmış Java ve Cucumber testleri yalnızca bu açık seçim komutunda kapsam dışındadır; normal Maven komutu değişmez. Import bağlantılarının güncel durumu aşağıdadır.
+
+İsteğe bağlı statik import grafiği eklendi: yapılandırılan kaynak köklerinde sayfaya eşlenen dosyalardan yerel import/re-export zincirleri izlenir. JavaScript ve TypeScript, dizin index dosyaları, açık alias eşlemeleri ve sabit metinli dinamik importlar desteklenir. Bileşen değişiklikleri gerekçeli dosya zinciriyle sayfa testlerine bağlanır. Çözülemeyen/dinamik bağlantılar geniş seçime neden olur. Tam AST/bundler çözümlemesi ve import dışı route bağlantıları henüz desteklenmiyor; otomatik Registry keşfi bekliyor.
+
+- [ ] React diff'i ile route, bileşen, Registry ve mevcut testler arasındaki bağlantıları çıkar. Önce ilgili testleri çalıştır, kapsam boşluğu varsa Faz 4'ü tetikle. Etki belirsizse daha geniş test kümesine dön.
+- [ ] React kaynağından ve canlı UI'dan Registry adayları çıkar. Locator'ı hedef sayfa ve kapsamda tarayıcıyla doğrula. İlk aşamada değişikliği diff olarak sun.
+- [ ] Test veri ihtiyacını senaryo önkoşullarından çıkar. Kayıtlı veri hazırlama işlemlerini seç, çalıştır ve temizlik kanıtını sakla.
+
+**Kabul ölçütü.** Bir PR değişikliğinden etkilenen testler, varsa eksik senaryo ve doğrulanmış Registry adayı gerekçeleriyle üretilir.
+
+## Faz 6 — Hata analizi ve kontrollü bakım
+
+- [ ] Koşum hatalarını uygulama davranışı, locator, veri, ortam ve kararsız koşum olarak sınıflandır. Kanıt yetersizse sonucu belirsiz olarak işaretle.
+- [ ] Locator değişikliğini sınırlı kapsamda öner ve etkilenen testleri yeniden çalıştır. İş kuralına ait doğrulamayı ve beklenen değeri koru. Ürün davranışıyla gereksinim arasındaki farkı hata olarak raporla.
+- [ ] Önce öneri modunda ölçüm yap. Sonra yalnızca proje politikasının izin verdiği, tarayıcıda doğrulanmış ve geri alınabilir değişiklikleri otomatik uygula.
+
+**Kabul ölçütü.** Kontrollü locator değişikliği Registry güncellemesiyle giderilir. Kontrollü iş kuralı ihlalinde doğrulama başarısız kalır ve doğru bulgu raporlanır.
+
+## Faz 7 — Otonom orkestrasyon
+
+- [ ] Gereksinim ve PR olaylarını tek iş akışına bağla. Her işin durumunu, girdi sürümlerini ve kararlarını kaydet. Aynı olay tekrar geldiğinde mükerrer öneri veya PR üretme.
+- [ ] Aşamaları yeniden denenebilir kıl. Deneme ve model bütçesi, koşum zaman aşımı ve yetkileri proje bazında sınırla. Çelişki, yetki dışı işlem veya belirsiz eşleşmeyi incelemeye yönlendir.
+- [ ] Derleme başarısı, kabul edilen öneri oranı, yanlış bakım önerisi, kararsız koşum ve maliyeti izle. Otomatik uygulama kapsamını ölçülen sonuçlara göre genişlet.
+
+**Kabul ölçütü.** Tanımlı bir değişiklik türü, tetiklenmeden doğrulanmış test çıktısına kadar elle müdahale gerektirmeden ilerler. İstisnalar kanıtıyla incelemeye düşer.
+
+## Faz 8 — Mevcut Maven projelerine mevcut testleri koruyarak entegrasyon
+
+**Amaç.** TestTR, kurumun Gherkin/Cucumber ve Java testlerini barındıran Maven projesine isteğe bağlı bir katman olarak eklenir. Geçiş senaryo bazında yapılır; mevcut testlerin topluca dönüştürülmesi veya giriş altyapısının yeniden yazılması gerekmez. Kullanıcı kararıyla bu faz en son uygulanacaktır.
 
 - [ ] Mevcut projenin POM'unu, Cucumber runner'larını, hook'larını, tarayıcı/oturum yönetimini, giriş kodunu, test verisi hazırlığını ve raporlama akışını incele. TestTR eklenmeden önce mevcut Maven komutlarıyla test seçimini ve sonuçlarını başlangıç kaydı olarak sakla.
 - [ ] TestTR kaynak üretimini ayrı ve açıkça etkinleştirilen bir Maven profiline bağla. `.feature` ve elle yazılmış Java kaynaklarını koru; `.testtr` dosyalarını ayrı dizinde, üretilen Java'yı yalnızca `target/` altında tut. Mevcut Surefire/Failsafe ve Cucumber test seçimini, bağımlılık sürümlerini ve normal CI komutlarını koruyacak yapılandırmayı doğrula.
@@ -177,30 +207,6 @@ Windows'ta CI için kullanılan Maven komutları ve XML dışa aktarımı üç p
 - [ ] TestTR kapalı, yalnızca mevcut testler, yalnızca pilot TestTR testi ve birlikte koşum durumlarını doğrula. Desteklenen JDK, JUnit, Cucumber ve tarayıcı kütüphanesi sürümlerini belgeleyip profil kapatılarak eski akışa dönüşü göster. Entegrasyon ve aşamalı geçiş rehberini örnek POM ve adaptörle teslim et.
 
 **Kabul ölçütü.** TestTR profili kapalıyken mevcut test komutları, seçilen testler ve davranışlar başlangıç kaydıyla aynı kalır. Profil açıkken pilot TestTR senaryosu kurumun mevcut giriş ve tarayıcı altyapısıyla başarılı çalışır; mevcut Gherkin ve Java testleri de çalışmaya devam eder. Beklenmeyen ek tarayıcı oturumu, mükerrer senaryo koşumu veya başka bir senaryoya ait oturumun kapatılması oluşmaz. Pilotun hatası kendi Türkçe kaynak satırına bağlanır ve mevcut raporlama akışı korunur.
-
-## Faz 6 — Değişiklik etkisi ve otomatik obje keşfi
-
-- [ ] React diff'i ile route, bileşen, Registry ve mevcut testler arasındaki bağlantıları çıkar. Önce ilgili testleri çalıştır, kapsam boşluğu varsa Faz 4'ü tetikle. Etki belirsizse daha geniş test kümesine dön.
-- [ ] React kaynağından ve canlı UI'dan Registry adayları çıkar. Locator'ı hedef sayfa ve kapsamda tarayıcıyla doğrula. İlk aşamada değişikliği diff olarak sun.
-- [ ] Test veri ihtiyacını senaryo önkoşullarından çıkar. Kayıtlı veri hazırlama işlemlerini seç, çalıştır ve temizlik kanıtını sakla.
-
-**Kabul ölçütü.** Bir PR değişikliğinden etkilenen testler, varsa eksik senaryo ve doğrulanmış Registry adayı gerekçeleriyle üretilir.
-
-## Faz 7 — Hata analizi ve kontrollü bakım
-
-- [ ] Koşum hatalarını uygulama davranışı, locator, veri, ortam ve kararsız koşum olarak sınıflandır. Kanıt yetersizse sonucu belirsiz olarak işaretle.
-- [ ] Locator değişikliğini sınırlı kapsamda öner ve etkilenen testleri yeniden çalıştır. İş kuralına ait doğrulamayı ve beklenen değeri koru. Ürün davranışıyla gereksinim arasındaki farkı hata olarak raporla.
-- [ ] Önce öneri modunda ölçüm yap. Sonra yalnızca proje politikasının izin verdiği, tarayıcıda doğrulanmış ve geri alınabilir değişiklikleri otomatik uygula.
-
-**Kabul ölçütü.** Kontrollü locator değişikliği Registry güncellemesiyle giderilir. Kontrollü iş kuralı ihlalinde doğrulama başarısız kalır ve doğru bulgu raporlanır.
-
-## Faz 8 — Otonom orkestrasyon
-
-- [ ] Gereksinim ve PR olaylarını tek iş akışına bağla. Her işin durumunu, girdi sürümlerini ve kararlarını kaydet. Aynı olay tekrar geldiğinde mükerrer öneri veya PR üretme.
-- [ ] Aşamaları yeniden denenebilir kıl. Deneme ve model bütçesi, koşum zaman aşımı ve yetkileri proje bazında sınırla. Çelişki, yetki dışı işlem veya belirsiz eşleşmeyi incelemeye yönlendir.
-- [ ] Derleme başarısı, kabul edilen öneri oranı, yanlış bakım önerisi, kararsız koşum ve maliyeti izle. Otomatik uygulama kapsamını ölçülen sonuçlara göre genişlet.
-
-**Kabul ölçütü.** Tanımlı bir değişiklik türü, tetiklenmeden doğrulanmış test çıktısına kadar elle müdahale gerektirmeden ilerler. İstisnalar kanıtıyla incelemeye düşer.
 
 ## Değerlendirmeye açık ilk faz önerileri
 

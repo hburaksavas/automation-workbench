@@ -26,6 +26,9 @@ jobs:
       - name: Verify AI draft workflow without API calls
         shell: pwsh
         run: ./.github/scripts/verify-ai-drafts.ps1
+      - name: Verify impacted scenario execution
+        shell: pwsh
+        run: ./.github/scripts/verify-impact-selection.ps1
   verify:
     runs-on: ${{ matrix.os }}
     defaults:

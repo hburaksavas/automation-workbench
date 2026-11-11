@@ -3,12 +3,10 @@ package dev.testtr.maven;
 import dev.testtr.ScenarioCompiler;
 import dev.testtr.ObjectRegistry;
 import dev.testtr.RequirementCatalog;
+import dev.testtr.ScenarioIdentity;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import org.apache.maven.plugin.AbstractMojo;
@@ -67,9 +65,7 @@ public final class GenerateMojo extends AbstractMojo {
                     for (Path source : sources) {
                         String relative = sourceDirectory.toPath().relativize(source).toString().replace('\\', '/');
                         for (var scenario : compiler.parseAll(source, objects, helpers.toPath(), catalog)) {
-                            String identity = relative + "\n" + scenario.name();
-                            String id = sha256(identity.getBytes(StandardCharsets.UTF_8));
-                            String name = "Scenario_" + id + "Test";
+                            String name = ScenarioIdentity.className(relative, scenario.name());
                             var scenarioMetadata = new LinkedHashMap<>(metadata);
                             if (catalog != null) scenarioMetadata.putAll(catalog.metadata(scenario.requirement(), relative));
                             generated.put(name + ".java", compiler.generate(scenario, relative, name, target, scenarioMetadata));
@@ -97,7 +93,4 @@ public final class GenerateMojo extends AbstractMojo {
         }
     }
 
-    private static String sha256(byte[] bytes) throws java.security.NoSuchAlgorithmException {
-        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
-    }
 }

@@ -8,6 +8,10 @@ Desteklenen cümle kalıpları, hata örnekleri ve Java karşılıkları [dil s�
 
 [AI taslak üretimi](ai-taslaklar.md), `testtr:draft` Maven hedefiyle onaylı gereksinimlerden ayrı inceleme dosyaları üretir ve mevcut derleyiciyle doğrular.
 
+[Değişiklik etkisi analizi](etki-analizi.md), `testtr:impact` Maven hedefiyle Git değişikliklerinden gerekçeli TestTR senaryo listesi çıkarır. JavaScript ve TypeScript kaynakları açık dosya kalıplarıyla sayfalara eşlenir.
+
+İsteğe bağlı `imports` ayarıyla sayfalardan bileşenlere import zincirleri takip edilir; `testtr:select test` yalnızca etkilenen TestTR senaryolarını çalıştırır. Çözülemeyen bağlantılar geniş seçime neden olur.
+
 [VS Code eklentisi](../testtr-vscode/README.md) adım şablonları, Registry ve ortak adım önerileri, Maven tanıları ve üretilen Java önizlemesi sağlar.
 
 ## Çalıştırma
@@ -121,6 +125,12 @@ Yardımcı işlem çağrısı sonu.
 `veri.testtr` örneği veriyi yardımcı işlemle üretir, alan üzerinden geri okur ve koşum kimliğiyle temizler. `sir.testtr` ortamdan alınan parolayı ortak adıma aktarır.
 
 ## Doğrulama
+
+Statik import grafiği eklendikten sonraki Windows Selenide `clean verify` koşumunda 65 test geçti: 39 derleyici/katalog/taslak/etki/import testi, 8 Maven/API/seçim testi, 10 koşum desteği testi ve örnek modüldeki 8 test. Göreli importlar, re-export zincirleri, index dosyaları, açık alias/harici paket ayarları, döngüler ve belirsizlikte geniş seçim sınandı.
+
+Etki seçimiyle koşum eklendikten sonraki Windows Selenide `clean verify` koşumunda 57 test geçti: 31 derleyici/katalog/taslak/etki testi, 8 Maven/API/seçim testi, 10 koşum desteği testi ve örnek modüldeki 8 test. Bağımsız Git/Maven kabul projesinde boş seçimde sıfır test, hedefli seçimde bir test, geniş seçimde iki test ve kasıtlı başarısız senaryoda Maven hata sonucu doğrulandı. İlgisiz Java testi bu açık seçim koşumlarına dahil edilmedi. Windows Git satır sonu uyarılarının dosya listesine karışması da düzeltildi.
+
+Etki analizi eklendikten sonraki Windows Selenide `clean verify` koşumunda 54 test geçti: 31 derleyici/katalog/taslak/etki testi, 5 Maven/API testi, 10 koşum desteği testi ve örnek modüldeki 8 test. Etki seçimi; JavaScript/TypeScript eşlemeleri, iç içe ortak çağrılar, yaşam döngüsü, belirsiz değişiklikler ve geçici Git deposundaki dosya değişiklikleriyle sınandı. Örnek projede gerçek `testtr:impact` komutu 7 senaryolu gerekçeli rapor üretti.
 
 AI taslak akışı eklendikten sonraki Windows Selenide `clean verify` koşumunda 45 test geçti: 24 derleyici/katalog/taslak testi, 3 API istemcisi testi, 10 koşum desteği testi ve örnek modüldeki 8 test. API istemcisi yerel HTTP sunucusuyla sınandı; canlı model çağrısı yapılmadı. Çevrimdışı Maven kabul kontrolü bağımsız projede taslak üretimini, kaynak izolasyonunu ve sabit kabul örneğinin Chrome'da başarılı koşumunu doğruladı.
 
