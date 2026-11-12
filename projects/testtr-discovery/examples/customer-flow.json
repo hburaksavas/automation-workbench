@@ -1,0 +1,7 @@
+[
+  { "action": "waitFor", "css": "[data-testid=customer-number]" },
+  { "action": "fill", "css": "[data-testid=customer-number]", "env": "CUSTOMER_NUMBER" },
+  { "action": "click", "css": "[data-testid=search-customer]" },
+  { "action": "waitFor", "css": "[data-testid=customer-details]" },
+  { "action": "scan" }
+]

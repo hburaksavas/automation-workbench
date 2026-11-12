@@ -175,6 +175,12 @@ Seçilen testlerin koşumu eklendi: tek test modülünde `testtr:select test`, g
 
 - [ ] React diff'i ile route, bileşen, Registry ve mevcut testler arasındaki bağlantıları çıkar. Önce ilgili testleri çalıştır, kapsam boşluğu varsa Faz 4'ü tetikle. Etki belirsizse daha geniş test kümesine dön.
 - [ ] React kaynağından ve canlı UI'dan Registry adayları çıkar. Locator'ı hedef sayfa ve kapsamda tarayıcıyla doğrula. İlk aşamada değişikliği diff olarak sun.
+
+  Canlı DOM keşfinin ilk bağımsız sürümü `../testtr-discovery/` projesinde eklendi:
+  otomatik başlangıç/değişiklik taraması, kullanıcı etkileşim kaydı, frame/sayfa
+  kapsamlı JSON raporu ve CLI akış çalıştırma bulunuyor. React kaynak analizi,
+  yeniden açılışlar arasında locator kararlılığı, Registry diff'i ve TestTR'ye
+  entegrasyon henüz tamamlanmadı; bu madde açık kalıyor.
 - [ ] Test veri ihtiyacını senaryo önkoşullarından çıkar. Kayıtlı veri hazırlama işlemlerini seç, çalıştır ve temizlik kanıtını sakla.
 
 **Kabul ölçütü.** Bir PR değişikliğinden etkilenen testler, varsa eksik senaryo ve doğrulanmış Registry adayı gerekçeleriyle üretilir.
