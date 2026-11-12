@@ -15,7 +15,7 @@ public final class DiscoverySession {
         }
         context.exposeBinding("__testtrEmit", (source, args) -> {
             recorder.accept(pages.computeIfAbsent(source.page(), p -> "page-" + (pages.size()+1)),
-                frames.computeIfAbsent(source.frame(), f -> "frame-" + (frames.size()+1)), source.frame().url(), args[0]);
+                frames.computeIfAbsent(source.frame(), f -> "frame-" + (frames.size()+1)), source.frame().url(), source.frame() == source.page().mainFrame(), args[0]);
             return null;
         });
         context.addInitScript(script);

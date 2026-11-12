@@ -50,4 +50,5 @@
     const original = history[method]; history[method] = function(...args) { const result = original.apply(this,args); schedule(); return result; };
   }
   window.__testtrScan = scan;
+  window.__testtrDescribe = describe;
 })();

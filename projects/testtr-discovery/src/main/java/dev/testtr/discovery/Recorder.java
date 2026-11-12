@@ -23,15 +23,18 @@ public final class Recorder {
     }
 
     public void accept(String pageId, String frameId, String url, Object payload) {
+        accept(pageId, frameId, url, false, payload);
+    }
+    public void accept(String pageId, String frameId, String url, boolean mainFrame, Object payload) {
         JsonNode data = mapper.valueToTree(payload);
         String location;
         try { URI uri = URI.create(url); location = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, null).toString(); }
         catch (Exception e) { location = "unknown"; }
         if ("scan".equals(data.path("kind").asText())) {
-            for (JsonNode object : data.path("objects")) remember(pageId, frameId, location, object, false);
+            for (JsonNode object : data.path("objects")) remember(pageId, frameId, location, mainFrame, object, false);
         } else if ("interaction".equals(data.path("kind").asText())) {
             JsonNode object = data.path("object");
-            remember(pageId, frameId, location, object, true);
+            remember(pageId, frameId, location, mainFrame, object, true);
             ObjectNode event = mapper.createObjectNode();
             event.put("sequence", events.size() + 1).put("time", Instant.now().toString()).put("page", pageId).put("frame", frameId).put("url", location);
             event.put("action", data.path("action").asText()); event.set("object", object);
@@ -40,10 +43,11 @@ public final class Recorder {
         }
         save();
     }
-    private void remember(String page, String frame, String url, JsonNode object, boolean interacted) {
+    private void remember(String page, String frame, String url, boolean mainFrame, JsonNode object, boolean interacted) {
         String key = page + "\n" + frame + "\n" + url + "\n" + object.path("css").asText() + "\n" + object.path("name").asText();
         ObjectNode record = object.deepCopy();
         record.put("page", page).put("frame", frame).put("url", url);
+        record.put("mainFrame", mainFrame);
         record.put("interacted", interacted || (objects.containsKey(key) && objects.get(key).path("interacted").asBoolean()));
         record.put("lastSeen", Instant.now().toString()); objects.put(key, record);
     }

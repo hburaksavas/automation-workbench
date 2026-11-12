@@ -167,23 +167,43 @@ Windows'ta CI için kullanılan Maven komutları ve XML dışa aktarımı üç p
 
 ## Faz 5 — Değişiklik etkisi ve otomatik obje keşfi
 
-İlk sürüm uygulandı: `testtr:impact` temel Git revizyonundan mevcut çalışma ağacına değişiklikleri alır; dosya kalıplarıyla sayfa eşlemesi, ortak adım çağrı zincirleri ve yaşam döngüsü adımları üzerinden gerekçeli senaryo listesi üretir. `.js`, `.jsx`, `.ts`, `.tsx` veya başka uzantılar desteklenir. Ortak girdiler ve belirsiz değişiklikler tüm TestTR senaryolarını seçtirir. Otomatik Registry keşfi henüz uygulanmadığından faz tamamlanmış sayılmaz. Ayrıntılar `etki-analizi.md` içindedir.
+İlk sürüm uygulandı: `testtr:impact` temel Git revizyonundan mevcut çalışma ağacına değişiklikleri alır; dosya kalıplarıyla sayfa eşlemesi, ortak adım çağrı zincirleri ve yaşam döngüsü adımları üzerinden gerekçeli senaryo listesi üretir. `.js`, `.jsx`, `.ts`, `.tsx` veya başka uzantılar desteklenir. Ortak girdiler ve belirsiz değişiklikler tüm TestTR senaryolarını seçtirir. Canlı DOM keşfi ve Registry önerisi bağımsız Discovery projesinde uygulanmıştır; React kaynak keşfi ve otomatik orkestrasyon beklediğinden faz tamamlanmış sayılmaz. Ayrıntılar `etki-analizi.md` içindedir.
 
 Seçilen testlerin koşumu eklendi: tek test modülünde `testtr:select test`, güncel etki raporundaki senaryoları aynı Maven oturumunda Surefire'a aktarır. Boş seçim testleri atlar; geniş seçim tüm TestTR senaryolarını çalıştırır. Elle yazılmış Java ve Cucumber testleri yalnızca bu açık seçim komutunda kapsam dışındadır; normal Maven komutu değişmez. Import bağlantılarının güncel durumu aşağıdadır.
 
-İsteğe bağlı statik import grafiği eklendi: yapılandırılan kaynak köklerinde sayfaya eşlenen dosyalardan yerel import/re-export zincirleri izlenir. JavaScript ve TypeScript, dizin index dosyaları, açık alias eşlemeleri ve sabit metinli dinamik importlar desteklenir. Bileşen değişiklikleri gerekçeli dosya zinciriyle sayfa testlerine bağlanır. Çözülemeyen/dinamik bağlantılar geniş seçime neden olur. Tam AST/bundler çözümlemesi ve import dışı route bağlantıları henüz desteklenmiyor; otomatik Registry keşfi bekliyor.
+İsteğe bağlı statik import grafiği eklendi: yapılandırılan kaynak köklerinde sayfaya eşlenen dosyalardan yerel import/re-export zincirleri izlenir. JavaScript ve TypeScript, dizin index dosyaları, açık alias eşlemeleri ve sabit metinli dinamik importlar desteklenir. Bileşen değişiklikleri gerekçeli dosya zinciriyle sayfa testlerine bağlanır. Çözülemeyen/dinamik bağlantılar geniş seçime neden olur. Tam AST/bundler çözümlemesi ve import dışı route bağlantıları henüz desteklenmiyor. Canlı DOM üzerinden Registry önerisi Discovery projesinde bulunur; React kaynaklarından Registry çıkarma bekliyor.
 
 - [ ] React diff'i ile route, bileşen, Registry ve mevcut testler arasındaki bağlantıları çıkar. Önce ilgili testleri çalıştır, kapsam boşluğu varsa Faz 4'ü tetikle. Etki belirsizse daha geniş test kümesine dön.
 - [ ] React kaynağından ve canlı UI'dan Registry adayları çıkar. Locator'ı hedef sayfa ve kapsamda tarayıcıyla doğrula. İlk aşamada değişikliği diff olarak sun.
 
   Canlı DOM keşfinin ilk bağımsız sürümü `../testtr-discovery/` projesinde eklendi:
   otomatik başlangıç/değişiklik taraması, kullanıcı etkileşim kaydı, frame/sayfa
-  kapsamlı JSON raporu ve CLI akış çalıştırma bulunuyor. React kaynak analizi,
-  yeniden açılışlar arasında locator kararlılığı, Registry diff'i ve TestTR'ye
-  entegrasyon henüz tamamlanmadı; bu madde açık kalıyor.
+  kapsamlı JSON raporu ve CLI akış çalıştırma bulunuyor. Registry önerisi/diff'i,
+  iki bağımsız tarayıcı context'inde locator doğrulaması, seçilen adayları ayrı
+  Registry snapshot'ına aktarma ve stdio MCP server eklendi. React kaynak analizi,
+  iframe Registry desteği ve TestTR/VS Code orkestrasyon entegrasyonu bekliyor;
+  üst madde bu nedenle açık kalıyor.
 - [ ] Test veri ihtiyacını senaryo önkoşullarından çıkar. Kayıtlı veri hazırlama işlemlerini seç, çalıştır ve temizlik kanıtını sakla.
 
 **Kabul ölçütü.** Bir PR değişikliğinden etkilenen testler, varsa eksik senaryo ve doğrulanmış Registry adayı gerekçeleriyle üretilir.
+
+### Registry önerisi ve MCP erişimi
+
+**Yerleşim.** Registry önerisi için yeni proje açılmaz; `projects/testtr-discovery` içinde CLI ve MCP tarafından paylaşılan Java servisleri kullanılır. CLI ve MCP girişleri aynı Java servislerini çağırır. Discovery ve TestTR ayrı MCP server olarak çalışabilir; VS Code eklentisi bu server'ları kullanan istemci olur. Mevcut CLI ve Maven kullanımına devam edilir.
+
+**Uygulama sırası.** Önce Discovery'nin keşif ve öneri işlemlerini ortak servislere ayır, ardından Discovery MCP girişini ekle. Sonra TestTR işlemlerini MCP üzerinden sun ve VS Code istemcisini bağla.
+
+- [x] Discovery JSON'u ve mevcut Registry'yi alan `suggest-registry` CLI komutunu ekle. URL/sayfa ve obje türü eşlemelerini yap; yeni obje, aynı kayıt, locator değişikliği ve belirsiz eşleşmeleri gerekçeleriyle JSON öneri dosyası ve HTML diff raporuna yaz. İlk sürüm mevcut Registry'yi değiştirmesin.
+- [x] Locator adaylarını desteklenen ana frame kapsamında iki bağımsız tarayıcı context'inde doğrula; tekillik, obje adı/türü ve her denemenin kanıtını sakla. Desteklenmeyen iframe/bilinmeyen frame kapsamlarını ve belirsiz ad/tür eşleşmelerini incelemeye ayır. Kullanıcının etkileştiği objeleri önceliklendir; etkileşim kaydından iş kuralı veya beklenen sonuç türetme.
+- [x] Kabul edilen önerilerin Registry'ye uygulanmasını ayrı bir işlem olarak ekle. Önerinin üretildiği Registry sürümünü kontrol et; arada değişiklik varsa yeniden karşılaştırma iste. Uygulama öncesi diff'i ve geri alınabilir çıktıyı koru. Uygulama mevcut Registry'yi değiştirmek yerine yeni tam snapshot dosyası oluşturur.
+- [x] Discovery için MCP server girişi ekle: keşif oturumu başlatma/durdurma, durum sorgulama, obje ve etkileşim sonuçlarını okuma, Registry önerisi üretme ve locator doğrulama işlemlerini yapılandırılmış girdiler/çıktılarla sun.
+- [ ] TestTR için ayrı MCP server girişi ekle: senaryo doğrulama, Java üretme, değişiklik etkisini hesaplama, test seçme/çalıştırma ve sonuçları okuma işlemlerini mevcut derleyici ve koşum servislerine bağla.
+- [x] Discovery'nin uzun süren keşif ve locator doğrulama işlemlerinde iş/oturum kimliği döndür; durum, sonuç, iptal, zaman aşımı ve kaynak temizliği yaşam döngüsünü tanımla. İptalde yalnızca ilgili işin sahip olduğu tarayıcı/context kaynaklarını kapat.
+- [ ] TestTR test koşumlarını da aynı iş/oturum yaşam döngüsüyle MCP üzerinden yönet.
+- [x] Discovery MCP için ilk taşıma olarak stdio desteğini ve istemci kurulum örneklerini ekle. Proje kökü, çıktı yolları ve çalıştırılabilir işlemleri yapılandır; değer kaydetmeme kuralını koru ve protokol çıktısını uygulama loglarından ayır.
+- [ ] VS Code eklentisini MCP istemcisi olarak bağla; keşif, öneri inceleme ve test sonuçlarını ilgili kaynaklarla ilişkilendir. CLI ve MCP'nin aynı girdide eşdeğer sonuç verdiğini, hata/iptal davranışını ve iki server'ın bağımsız çalıştığını doğrula.
+
+**Kabul ölçütü.** Bir MCP istemcisi Discovery oturumundan objeleri okuyup mevcut Registry'ye karşı gerekçeli öneri üretir; TestTR server'ında bir senaryoyu doğrular ve seçili testin sonucunu alır. Registry yalnızca ayrı uygulama işlemiyle değişir. CLI/Maven akışları çalışmaya devam eder; iptal ve hata durumlarında oturum kaynakları temizlenir.
 
 ## Faz 6 — Hata analizi ve kontrollü bakım
 
