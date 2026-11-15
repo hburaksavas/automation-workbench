@@ -140,6 +140,10 @@
       {
         "command": "testtr.mcp.disconnect",
         "title": "TestTR: MCP bağlantılarını kapat"
+      },
+      {
+        "command": "testtr.mcp.analyzeResults",
+        "title": "TestTR: MCP ile JUnit hata analizini aç"
       }
     ],
     "configuration": {

@@ -46,23 +46,24 @@ public final class ScenarioContext {
 
     public String value(String name) {
         Value value = values.get(name);
-        if (value == null) throw new IllegalStateException("Değişken henüz oluşturulmadı: " + name);
+        if (value == null) throw new MissingTestValueException("Değişken henüz oluşturulmadı: " + name);
         return value.text();
     }
 
     public AssertionError failure(String location, Throwable cause) {
+        FailureCode code = FailureCode.from(cause);
         // Browser errors can contain passwords in selectors, values, or nested causes.
-        if (sensitive) return new AssertionError(location + " [Gizli değer kullanılan koşumda hata ayrıntıları gizlendi]");
+        if (sensitive) return new ScenarioFailure(location + " [Gizli değer kullanılan koşumda hata ayrıntıları gizlendi]", code, null);
         if (Boolean.getBoolean("testtr.redactDiagnostics")) {
             if (cause instanceof UiContract.SafeObservationFailure)
-                return new AssertionError(location, cause);
-            return new AssertionError(location + " [Hata ayrıntıları gizlendi]");
+                return new ScenarioFailure(location, code, cause);
+            return new ScenarioFailure(location + " [Hata ayrıntıları gizlendi]", code, null);
         }
-        return new AssertionError(location, cause);
+        return new ScenarioFailure(location, code, cause);
     }
 
     private String require(String value, String name) {
-        if (value == null) throw new IllegalStateException("Değer bulunamadı: " + name);
+        if (value == null) throw new MissingTestValueException("Değer bulunamadı: " + name);
         return value;
     }
 }

@@ -92,7 +92,7 @@ public final class UiContract {
     public static void expectUrl(Supplier<String> current, String expected) {
         await("Adres " + expected, () -> {
             String actual = current.get();
-            return new Observation(sameUrl(expected, actual), actual);
+            return new Observation(sameUrl(expected, actual), actual, FailureCode.URL_MISMATCH);
         });
     }
 
@@ -101,7 +101,8 @@ public final class UiContract {
         await(redact ? operation : operation + " beklenen=" + expected, () -> {
             Map<?, ?> state = state(snapshot.get());
             return new Observation(matches(state, operation, expected),
-                    redact ? safeState(state) : state.toString());
+                    redact ? safeState(state) : state.toString(), count(state) == 0 ? FailureCode.ELEMENT_MISSING
+                            : operation.startsWith("ready-") ? FailureCode.ACTION_NOT_READY : FailureCode.ASSERTION_MISMATCH);
         }, redact);
     }
 
@@ -123,7 +124,7 @@ public final class UiContract {
                 requireKind(state, "input");
                 value[0] = string(state, "value");
             }
-            return new Observation(present, state.toString());
+            return new Observation(present, state.toString(), FailureCode.ELEMENT_MISSING);
         });
         return value[0];
     }
@@ -132,22 +133,22 @@ public final class UiContract {
         int[] index = {-1};
         await("Seçenek " + label, () -> {
             Map<?, ?> state = state(snapshot.get());
-            if (count(state) == 0) return new Observation(false, "Liste bulunamadı");
+            if (count(state) == 0) return new Observation(false, "Liste bulunamadı", FailureCode.ELEMENT_MISSING);
             requireKind(state, "select");
             List<?> options = (List<?>) state.get("options");
             List<?> matches = options.stream().filter(item -> text(string((Map<?, ?>) item, "label")).equals(text(label))).toList();
-            if (matches.size() > 1) throw new AssertionError("Seçenek adı benzersiz değil: " + label);
-            if (matches.isEmpty()) return new Observation(false, "Seçenek bulunamadı");
+            if (matches.size() > 1) throw new UiFailure(FailureCode.OPTION_AMBIGUOUS, "Seçenek adı benzersiz değil: " + label);
+            if (matches.isEmpty()) return new Observation(false, "Seçenek bulunamadı", FailureCode.OPTION_MISSING);
             Map<?, ?> option = (Map<?, ?>) matches.get(0);
             index[0] = ((Number) option.get("index")).intValue();
-            return new Observation(!flag(option, "disabled"), option.toString());
+            return new Observation(!flag(option, "disabled"), option.toString(), FailureCode.OPTION_DISABLED);
         });
         return index[0];
     }
 
     private static Map<?, ?> state(Object value) {
         if (!(value instanceof Map<?, ?> state)) throw new IllegalStateException("Geçersiz DOM gözlemi.");
-        if (count(state) > 1) throw new AssertionError("Locator benzersiz değil. Eşleşme sayısı: " + count(state));
+        if (count(state) > 1) throw new UiFailure(FailureCode.LOCATOR_AMBIGUOUS, "Locator benzersiz değil. Eşleşme sayısı: " + count(state));
         return state;
     }
 
@@ -159,8 +160,8 @@ public final class UiContract {
     private static String string(Map<?, ?> state, String name) { return (String) state.get(name); }
 
     private static void requireKind(Map<?, ?> state, String kind) {
-        if (!kind.equals(state.get("kind"))) throw new AssertionError("DOM obje tipi uyuşmuyor. Beklenen: " + kind);
-        if (kind.equals("select") && flag(state, "multiple")) throw new AssertionError("Tek seçimli liste bekleniyor.");
+        if (!kind.equals(state.get("kind"))) throw new UiFailure(FailureCode.ELEMENT_TYPE_MISMATCH, "DOM obje tipi uyuşmuyor. Beklenen: " + kind);
+        if (kind.equals("select") && flag(state, "multiple")) throw new UiFailure(FailureCode.ELEMENT_TYPE_MISMATCH, "Tek seçimli liste bekleniyor.");
     }
 
     private static boolean matches(Map<?, ?> state, String operation, String expected) {
@@ -200,10 +201,10 @@ public final class UiContract {
         };
     }
 
-    private record Observation(boolean matched, String actual) {}
+    private record Observation(boolean matched, String actual, FailureCode code) {}
 
-    static final class SafeObservationFailure extends AssertionError {
-        private SafeObservationFailure(String message) { super(message); }
+    static final class SafeObservationFailure extends UiFailure {
+        private SafeObservationFailure(String message, FailureCode code) { super(code, message); }
     }
 
     private static void await(String description, Supplier<Observation> check) {
@@ -225,7 +226,7 @@ public final class UiContract {
             }
         } while (true);
         String message = description + "; gözlenen=" + observation.actual();
-        if (safeObservation) throw new SafeObservationFailure(message);
-        throw new AssertionError(message);
+        if (safeObservation) throw new SafeObservationFailure(message, observation.code());
+        throw new UiFailure(observation.code(), message);
     }
 }

@@ -26,6 +26,7 @@ public final class McpServer implements AutoCloseable {
         define("job_status", "Read job state and cancellation request.", "jobId!");
         define("stop_job", "Cancel an owned Maven process tree. Poll until terminal state confirms cleanup.", "jobId!");
         define("read_results", "Read immutable structured results for a terminal job. Does not return raw Maven logs or XML system properties.", "jobId!");
+        define("analyze_results", "Classify existing JUnit reports using typed evidence only; root cause remains unconfirmed. No tests or Registry are modified.", "reportsDirectory!");
         if (allowTools != null) {
             Set<String> allowed = new HashSet<>(Arrays.asList(allowTools.split(",")));
             if (!definitions.keySet().containsAll(allowed)) throw new IllegalArgumentException("Unknown allow-tools entry");
@@ -118,6 +119,7 @@ public final class McpServer implements AutoCloseable {
         return switch (name) {
             case "validate_scenario" -> projects.compile(args, false);
             case "generate_java" -> projects.compile(args, true);
+            case "analyze_results" -> projects.analyze(args);
             case "job_status" -> jobs.status(args.path("jobId").asText());
             case "stop_job" -> jobs.cancel(args.path("jobId").asText());
             case "read_results" -> jobs.results(args.path("jobId").asText());

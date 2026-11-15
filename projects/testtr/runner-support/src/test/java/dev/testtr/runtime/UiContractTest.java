@@ -8,6 +8,25 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UiContractTest {
+    @Test void distinguishesObservationMismatchMissingElementAndAmbiguousLocator() {
+        String previous = System.getProperty("testtr.timeoutMillis");
+        try {
+            System.setProperty("testtr.timeoutMillis", "1");
+            var mismatch = assertThrows(UiFailure.class, () -> UiContract.expect(() -> element("input"), "value", "different"));
+            assertEquals(FailureCode.ASSERTION_MISMATCH, mismatch.code());
+            var missing = assertThrows(UiFailure.class, () -> UiContract.expect(() -> Map.of("count", 0), "visible", ""));
+            assertEquals(FailureCode.ELEMENT_MISSING, missing.code());
+            var ambiguous = assertThrows(UiFailure.class, () -> UiContract.expect(() -> Map.of("count", 2), "visible", ""));
+            assertEquals(FailureCode.LOCATOR_AMBIGUOUS, ambiguous.code());
+            var wrongKind = assertThrows(UiFailure.class, () -> UiContract.ready(() -> element("input"), "click"));
+            assertEquals(FailureCode.ELEMENT_TYPE_MISMATCH, wrongKind.code());
+            var disabled = element("button"); disabled.put("enabled", false);
+            assertEquals(FailureCode.ACTION_NOT_READY, assertThrows(UiFailure.class, () -> UiContract.ready(() -> disabled, "click")).code());
+        } finally {
+            if (previous == null) System.clearProperty("testtr.timeoutMillis"); else System.setProperty("testtr.timeoutMillis", previous);
+        }
+    }
+
     private Map<String, Object> element(String kind) {
         var state = new HashMap<String, Object>();
         state.put("count", 1);

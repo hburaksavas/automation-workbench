@@ -66,6 +66,7 @@ class MavenJobsTest {
             assertEquals("failed", failed.path("status").asText());
             assertEquals(1, failed.path("exitCode").asInt());
             assertEquals("failed", failed.at("/results/suites/0/testcases/0/status").asText(), failed.toString());
+            assertEquals("uncertain", failed.at("/results/suites/0/testcases/0/analysis/category").asText());
             assertFalse(failed.toString().contains("DO_NOT_RETURN_SECRET"));
             assertEquals(passed, jobs.results(id)); // Later reports cannot mutate previous results.
         }
@@ -99,6 +100,7 @@ class MavenJobsTest {
             assertFalse(ProcessHandle.of(child).map(ProcessHandle::isAlive).orElse(false));
             var timedOut = await(jobs, jobs.start("run_tests", args().put("timeoutSeconds", 1)).path("jobId").asText());
             assertEquals("timed-out", timedOut.path("status").asText());
+            assertEquals("uncertain", timedOut.at("/results/executionAnalysis/category").asText());
         }
     }
     @Test void closingServerCancelsActiveJob() throws Exception {

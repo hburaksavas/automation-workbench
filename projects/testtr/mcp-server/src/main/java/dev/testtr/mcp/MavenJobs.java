@@ -3,12 +3,11 @@ package dev.testtr.mcp;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.*;
+import dev.testtr.FailureAnalyzer;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Element;
 
 /** A single owned Maven process at a time avoids shared target/Surefire races. */
 final class MavenJobs implements AutoCloseable {
@@ -115,6 +114,11 @@ final class MavenJobs implements AutoCloseable {
                 terminate(List.of(process.toHandle()));
             }
             if (job.result == null) job.result = ProjectService.JSON.createObjectNode();
+            if (Set.of("failed", "timed-out").contains(terminal) && job.result.path("analysisSummary").path("testCount").asInt() == 0) {
+                var evidence = job.result.putObject("executionAnalysis").put("category", "uncertain")
+                        .put("certainty", "insufficient-evidence").put("rootCause", "unconfirmed").put("automaticMaintenanceAllowed", false);
+                evidence.putArray("evidenceCodes").add(terminal.equals("timed-out") ? "JOB_TIMED_OUT_WITHOUT_TEST_EVIDENCE" : "MAVEN_FAILED_WITHOUT_TEST_EVIDENCE");
+            }
             job.state = terminal;
         }
     }
@@ -136,27 +140,11 @@ final class MavenJobs implements AutoCloseable {
         return result;
     }
     private ObjectNode readTests(Path directory, Map<Path,FileStamp> before) throws Exception {
-        var result = ProjectService.JSON.createObjectNode();
-        var suites = result.putArray("suites");
-        var factory = DocumentBuilderFactory.newInstance();
-        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-        factory.setXIncludeAware(false); factory.setExpandEntityReferences(false);
+        var fresh = new ArrayList<Path>();
         for (var file : stamps(directory).entrySet()) {
-            if (file.getValue().equals(before.get(file.getKey()))) continue;
-            if (file.getValue().size() > 4_000_000) throw new IllegalArgumentException("JUnit report exceeds 4MB");
-            Element suite = factory.newDocumentBuilder().parse(file.getKey().toFile()).getDocumentElement();
-            var item = suites.addObject();
-            for (String key : List.of("name", "tests", "failures", "errors", "skipped", "time")) item.put(key, suite.getAttribute(key));
-            var tests = item.putArray("testcases");
-            var cases = suite.getElementsByTagName("testcase");
-            for (int i = 0; i < cases.getLength(); i++) {
-                Element test = (Element) cases.item(i);
-                String state = test.getElementsByTagName("failure").getLength() > 0 ? "failed" : test.getElementsByTagName("error").getLength() > 0 ? "error" : test.getElementsByTagName("skipped").getLength() > 0 ? "skipped" : "passed";
-                tests.addObject().put("name", test.getAttribute("name")).put("className", test.getAttribute("classname")).put("status", state);
-            }
+            if (!file.getValue().equals(before.get(file.getKey()))) fresh.add(file.getKey());
         }
+        var result = new FailureAnalyzer().analyze(fresh);
         result.put("reportsDirectory", directory.toString());
         result.put("reportScope", "files created or modified during this job; empty does not prove tests ran");
         return result;

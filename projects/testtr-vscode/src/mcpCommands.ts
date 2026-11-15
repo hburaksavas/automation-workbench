@@ -141,7 +141,7 @@ async function openResultSource(folder: vscode.WorkspaceFolder) {
     const cases = (last.value.results?.suites ?? []).flatMap((suite: JsonObject) => suite.testcases ?? []) as JsonObject[];
     const items = selected.map(scenario => {
         const tests = cases.filter(test => test.className?.split('.').pop() === scenario.scenarioId);
-        return { label: scenario.name as string, description: tests.map(t => t.status).join(', ') || 'seçildi; koşum sonucu yok', detail: scenario.source as string, scenario };
+        return { label: scenario.name as string, description: tests.map(t => `${t.status}${t.analysis?.category && t.analysis.category !== 'none' ? ' · ' + t.analysis.category : ''}`).join(', ') || 'seçildi; koşum sonucu yok', detail: scenario.source as string, scenario };
     });
     if (!items.length) { await vscode.window.showInformationMessage('Son etki raporunda seçilen senaryo yok.'); return; }
     const item = await vscode.window.showQuickPick(items, { placeHolder: 'Kaynakta açılacak senaryoyu seçin' });
@@ -161,6 +161,11 @@ async function discover(project: Project) {
     if (await exists(file)) { reports.set(project.folder.uri.fsPath, file); await openFile(file); }
     else throw new Error(`Keşif raporu oluşmadı: ${terminal.status}`);
     if (terminal.status === 'failed' || terminal.status === 'timed-out') await vscode.window.showWarningMessage(`Discovery işi ${terminal.status}; rapor kısmi olabilir.`);
+}
+async function analyzeResults(project: Project) {
+    const client = await connection(project.folder, 'testtr');
+    const directory = path.resolve(project.module, settings(project.folder).get('mcp.reportsDirectory', '') || 'target/surefire-reports');
+    await showJson(await client.call('analyze_results', { reportsDirectory: directory }));
 }
 async function suggest(project: Project) {
     const root = project.folder.uri.fsPath;
@@ -223,7 +228,7 @@ export function registerMcpCommands(context: vscode.ExtensionContext, legacyBusy
         'validate': p => compile(p, false), 'preview': p => compile(p, true), 'impact': p => runTests(p, true),
         'test': p => runTests(p, false), 'discover': discover, 'suggestRegistry': suggest,
         'reviewRegistry': p => proposal(p, false), 'validateRegistry': p => proposal(p, true), 'applyRegistry': apply,
-        'openResultSource': p => openResultSource(p.folder)
+        'openResultSource': p => openResultSource(p.folder), 'analyzeResults': analyzeResults
     };
     for (const [name, action] of Object.entries(actions)) context.subscriptions.push(vscode.commands.registerCommand(`testtr.mcp.${name}`, async () => {
         let id: string | undefined;

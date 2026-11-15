@@ -19,6 +19,16 @@ final class ProjectService {
         if (!ancestor.toRealPath().startsWith(root)) throw new IllegalArgumentException("Path resolves outside project root");
         return candidate;
     }
+    ObjectNode analyze(JsonNode args) throws Exception {
+        var analyzer = new FailureAnalyzer();
+        Path directory = path(args.path("reportsDirectory").asText());
+        var reports = analyzer.reports(directory);
+        for (Path report : reports) path(report.toString());
+        var result = analyzer.analyze(reports);
+        result.put("reportsDirectory", directory.toString());
+        result.put("reportScope", "existing-reports; files may belong to different runs");
+        return result;
+    }
     ObjectNode compile(JsonNode args, boolean generate) throws Exception {
         Path source = path(args.path("source").asText()), registry = path(args.path("registry").asText());
         Path helpers = path(args.path("helpers").asText("src/test/helpers.json"));

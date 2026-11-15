@@ -52,6 +52,7 @@ depoda `mcp.pom` ile test modülünü belirtmek önerilir.
 | MCP ile değişiklik etkisini hesapla | `mcp.impactBase` revizyonuna göre Maven etki analizini çalıştırıp JSON sonucu açar. |
 | MCP ile etkilenen testleri çalıştır | Güncel etki analizini ve `select test` koşumunu aynı Maven oturumunda çalıştırır. |
 | MCP sonucundaki senaryoyu kaynakta aç | Son etki/koşum raporundaki senaryoları sonuçlarıyla listeler; seçilen `.testtr` kaynağını açar. |
+| MCP ile JUnit hata analizini aç | Mevcut Surefire raporlarını tipli kanıtlarla sınıflandırır; test çalıştırmadan JSON analizini açar. |
 | Discovery ile obje keşfini başlat | URL alır, görünür tarayıcı açar; tarayıcı kullanılırken kayıt yapar. Bildirimde **İptal**, keşfi durdurup varsa kısmi raporu açar. |
 | Discovery raporundan Registry önerisi üret | Seçilen Discovery JSON'unu Registry ile karşılaştırır; öneriyi kaydeder ve aday seçimi sunar. |
 | Registry önerisini incele | Adayın gerekçelerini listeler; seçileni önceki/önerilen JSON diff görünümünde açar. |
@@ -88,6 +89,12 @@ Sonuç JSON'unda ham Maven logları veya JUnit sistem özellikleri gösterilmez.
 koşumun yerel log yolu sonuçta yer alır; log proje çıktıları ve hassas değerler içerebilir.
 Boş sonuç listesi testlerin çalıştığı anlamına gelmez. `sourceDirectory` ayarı kaynak
 gezinmesi için Maven yapılandırmasıyla aynı olmalıdır.
+
+Koşum sonuçlarında `analysis` ve `analysisSummary` alanları da bulunur. Davranış,
+locator, veri, ortam ve açık yeniden deneme kararsızlığı için gözlem sınıfları
+sunulur; yeterli kanıt yoksa kategori `uncertain` olur. Kök neden doğrulanmış
+sayılmaz ve otomatik bakım yapılmaz. Eski koşum desteğiyle üretilmiş kodsuz hatalar
+da belirsiz kalır. Ayrıntılar [TestTR hata analizi rehberinde](../testtr/hata-analizi.md).
 
 ## Geliştirme kontrolleri
 

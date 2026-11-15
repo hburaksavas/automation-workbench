@@ -63,13 +63,31 @@ test('real servers: discovery → validated snapshot → TestTR preview, impact,
         await fs.writeFile(path.join(directory, 'pom.xml'), `<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion>
           <groupId>dev.testtr.acceptance</groupId><artifactId>editor-client</artifactId><version>1</version>
           <properties><maven.compiler.release>17</maven.compiler.release></properties>
-          <dependencies><dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.11.4</version><scope>test</scope></dependency></dependencies>
+          <dependencies><dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.11.4</version><scope>test</scope></dependency>
+          <dependency><groupId>dev.testtr</groupId><artifactId>runner-support</artifactId><version>0.1.0-SNAPSHOT</version><scope>test</scope></dependency></dependencies>
           <build><plugins><plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.13.0</version></plugin>
           <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.5.2</version></plugin></plugins></build></project>`);
         const run = await testtr.call('run_tests', { pom: path.join(directory, 'pom.xml'), timeoutSeconds: 60 });
         assert.equal((await finished(testtr, run)).status, 'completed');
         const results = await testtr.call('read_results', { jobId: run.jobId });
         assert.equal(results.results.suites[0].testcases[0].status, 'passed');
+        // A real typed UI observation crosses redaction, Surefire XML, the MCP server and this client.
+        await fs.writeFile(path.join(directory, 'src/test/java/ConsumerTest.java'), `public class ConsumerTest {
+          @org.junit.jupiter.api.Test void example() {
+            var context = new dev.testtr.runtime.ScenarioContext(); context.put("secret", "DO_NOT_RETURN_SECRET", true);
+            try { dev.testtr.runtime.UiContract.expect(() -> java.util.Map.of("count", 2), "visible", ""); }
+            catch (AssertionError failure) { throw context.failure("sample.testtr:3", failure); }
+          }
+        }`);
+        const failed = await testtr.call('run_tests', { pom: path.join(directory, 'pom.xml'), timeoutSeconds: 60 });
+        assert.equal((await finished(testtr, failed)).status, 'failed');
+        const classified = await testtr.call('read_results', { jobId: failed.jobId });
+        assert.equal(classified.results.suites[0].testcases[0].analysis.category, 'locator');
+        assert.equal(classified.results.suites[0].testcases[0].status, 'failed');
+        assert.equal(classified.results.suites[0].testcases[0].analysis.automaticMaintenanceAllowed, false);
+        assert.ok(!JSON.stringify(classified).includes('DO_NOT_RETURN_SECRET'));
+        const existing = await testtr.call('analyze_results', { reportsDirectory: path.join(directory, 'target/surefire-reports') });
+        assert.deepEqual(existing.suites, classified.results.suites);
     } finally {
         await Promise.allSettled(clients.map(client => client.close()));
         assert.equal(path.dirname(directory), path.join(root, 'target', 'testtr-vscode-acceptance'));

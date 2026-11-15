@@ -181,8 +181,9 @@ Seçilen testlerin koşumu eklendi: tek test modülünde `testtr:select test`, g
   kapsamlı JSON raporu ve CLI akış çalıştırma bulunuyor. Registry önerisi/diff'i,
   iki bağımsız tarayıcı context'inde locator doğrulaması, seçilen adayları ayrı
   Registry snapshot'ına aktarma ve stdio MCP server eklendi. React kaynak analizi,
-  iframe Registry desteği ve TestTR/VS Code orkestrasyon entegrasyonu bekliyor;
-  üst madde bu nedenle açık kalıyor.
+  iframe Registry desteği ve otomatik orkestrasyon bekliyor. MCP ve VS Code
+  komut entegrasyonu aşağıdaki bölümde tamamlanmıştır; üst madde kaynak analizi
+  ve otomatik orkestrasyon eksikleri nedeniyle açık kalıyor.
 - [ ] Test veri ihtiyacını senaryo önkoşullarından çıkar. Kayıtlı veri hazırlama işlemlerini seç, çalıştır ve temizlik kanıtını sakla.
 
 **Kabul ölçütü.** Bir PR değişikliğinden etkilenen testler, varsa eksik senaryo ve doğrulanmış Registry adayı gerekçeleriyle üretilir.
@@ -211,9 +212,13 @@ VS Code istemcisi `../testtr-vscode/` içinde eklendi. İki ayrı stdio bağlant
 
 ## Faz 6 — Hata analizi ve kontrollü bakım
 
-- [ ] Koşum hatalarını uygulama davranışı, locator, veri, ortam ve kararsız koşum olarak sınıflandır. Kanıt yetersizse sonucu belirsiz olarak işaretle.
+- [x] Koşum hatalarını uygulama davranışı, locator, veri, ortam ve kararsız koşum olarak sınıflandır. Kanıt yetersizse sonucu belirsiz olarak işaretle.
 - [ ] Locator değişikliğini sınırlı kapsamda öner ve etkilenen testleri yeniden çalıştır. İş kuralına ait doğrulamayı ve beklenen değeri koru. Ürün davranışıyla gereksinim arasındaki farkı hata olarak raporla.
 - [ ] Önce öneri modunda ölçüm yap. Sonra yalnızca proje politikasının izin verdiği, tarayıcıda doğrulanmış ve geri alınabilir değişiklikleri otomatik uygula.
+
+İlk hata analizi sürümü, tipli ve değer içermeyen runtime tanı kodlarını JUnit sonuçlarına taşır. Sır maskelenirken kod korunur; serbest hata metni neden olarak yorumlanmaz. Ortak analiz çekirdeği `testtr:analyze`, MCP `analyze_results`/`read_results` ve VS Code hata analizi komutunda kullanılır. Bulunamayan obje, genel timeout ve eski kodsuz raporlar belirsiz kalır. Kararsızlık yalnızca aynı testcase içindeki açık başarısız-deneme/başarı kaydıyla gözlenir; farklı koşumlar birleştirilmez. Birincil hata ve test sonucu korunur; tüm sonuçlarda kök neden doğrulanmamıştır ve otomatik bakım kapalıdır. Locator onarımı ve ölçümlü otomatik uygulama sonraki işlerdir. Ayrıntılar `hata-analizi.md` içindedir.
+
+Windows doğrulaması: Playwright ve MCP kabul profiliyle tam `clean verify` 91 testle geçti; Selenium ve Selenide örnek test koşumları da başarılı. VS Code tarafında 13 protokol/komut testi ve gerçek server'larla, sırlı koşumdaki tipli hatanın JUnit → MCP → istemci analizine taşınmasını da içeren kabul testi geçti (toplam 14). Maven `analyze` hedefi gerçek örnek raporlarında doğrulandı. Ubuntu CI sonucu ve önceki canlı Extension Host kontrolü henüz doğrulanmadı.
 
 **Kabul ölçütü.** Kontrollü locator değişikliği Registry güncellemesiyle giderilir. Kontrollü iş kuralı ihlalinde doğrulama başarısız kalır ve doğru bulgu raporlanır.
 

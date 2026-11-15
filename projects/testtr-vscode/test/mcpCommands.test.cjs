@@ -130,3 +130,12 @@ test('untrusted workspaces never spawn a server', async () => {
     try { await commands.get('testtr.mcp.preview')(); assert.equal(launches.length, 0); assert.equal(ui.errors.length, 1); }
     finally { vscode.workspace.isTrusted = true; }
 });
+test('analysis command reads configured report directory without starting a new test run', async () => {
+    config['mcp.reportsDirectory'] = 'target/custom-reports';
+    nextCall = () => ({ analysisSummary: { uncertainCount: 1 }, suites: [] });
+    await commands.get('testtr.mcp.analyzeResults')();
+    assert.deepEqual(ui.errors, []);
+    assert.equal(calls.length, 1); assert.equal(calls[0].name, 'analyze_results');
+    assert.equal(calls[0].args.reportsDirectory, path.join(root, 'target/custom-reports'));
+    assert.match(ui.opened[0].content, /uncertainCount/);
+});

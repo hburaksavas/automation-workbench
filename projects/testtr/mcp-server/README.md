@@ -61,6 +61,7 @@ içindir. Discovery ve TestTR ayrı server adlarıyla aynı istemciye eklenebili
 | `job_status` | `jobId`. `queued`, `running`, `completed`, `failed`, `cancelled` veya `timed-out`; iptal isteği ve varsa çıkış kodu. |
 | `stop_job` | `jobId`. İptal ister; terminal durum süreç temizliği tamamlanınca yayınlanır. |
 | `read_results` | `jobId`. Terminal işin değişmez sonucunu, etki raporunu ve varsa yeni JUnit sonuç özetlerini döndürür. |
+| `analyze_results` | `reportsDirectory`. Mevcut JUnit raporlarını tipli hata kanıtıyla sınıflandırır; Maven kurulumu gerektirmez ve test çalıştırmaz. |
 
 Dosya yolları `--root` dizinine göredir. Doğrulama/önizleme POM okumaz;
 `registry` açıkça verilir, `helpers` ve `requirements` varsayılanları root altında
@@ -122,6 +123,11 @@ testlerini kapsamaz. Ayrıntılar [etki analizi rehberinde](../etki-analizi.md).
   iş sırasında oluşturulan/değişen XML dosyaları alınır; boş liste başarılı test
   kanıtı sayılmaz. Tam XML hata kanıtları mevcut TestTR raporlama akışında kalır.
   Rapor başına 4 MB sınırı vardır; XML dış varlıkları kapalıdır.
+- `read_results` testcase'lere kanıta dayalı `analysis`, rapora `analysisSummary`
+  ekler. Yetersiz kanıt `uncertain` kalır; yeni test kanıtı olmadan başarısız/zaman
+  aşımına uğrayan işte ayrıca `executionAnalysis` bulunur. `analyze_results` mevcut
+  dosyaları okur; farklı koşumları birleştirerek kararsızlık çıkarmaz. Analiz hiçbir
+  bakım işlemine izin vermez. Ayrıntılar [hata analizi rehberinde](../hata-analizi.md).
 - `pom` tek test modülünü göstermelidir; reactor/Failsafe koşumu desteklenmez.
   Maven hedefleri mevcut POM/profil ayarlarını kullanır. Maven doğrudan server'ın
   JDK'sıyla başlatılır; shell komutu, genel Maven argüman listesi, `MAVEN_OPTS` veya
