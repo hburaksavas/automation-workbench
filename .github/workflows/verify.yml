@@ -6,6 +6,61 @@ permissions:
   contents: read
 
 jobs:
+  mcp-server:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    defaults:
+      run:
+        working-directory: projects/testtr
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: projects/testtr/**/pom.xml
+      - name: Install TestTR Maven goals
+        shell: pwsh
+        run: |
+          if ($IsWindows) { ./mvnw.cmd --batch-mode -pl maven-plugin,runner-support -am install }
+          else { sh ./mvnw --batch-mode -pl maven-plugin,runner-support -am install }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify MCP and owned Maven process lifecycle
+        shell: pwsh
+        run: |
+          if ($IsWindows) { ./mvnw.cmd --batch-mode -pl mcp-server -am -Pmcp-acceptance verify }
+          else { sh ./mvnw --batch-mode -pl mcp-server -am -Pmcp-acceptance verify }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: projects/testtr-vscode/package-lock.json
+      - name: Build Discovery for the editor client acceptance test
+        working-directory: projects/testtr-discovery
+        shell: pwsh
+        run: |
+          if ($IsWindows) { ./mvnw.cmd --batch-mode -DskipTests package }
+          else { sh ./mvnw --batch-mode -DskipTests package }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          java -cp target/testtr-discovery-0.1.0-SNAPSHOT.jar com.microsoft.playwright.CLI install --with-deps chromium
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify editor commands and both real MCP servers
+        working-directory: projects/testtr-vscode
+        shell: pwsh
+        run: |
+          npm ci
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $mavenConfig = Get-ChildItem (Join-Path $HOME '.m2/wrapper/dists') -Filter m2.conf -Recurse | Select-Object -First 1
+          if (!$mavenConfig) { throw 'Maven Wrapper installation not found' }
+          $env:TESTTR_MAVEN_HOME = $mavenConfig.Directory.Parent.FullName
+          $env:TESTTR_REAL_MCP = '1'
+          npm test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   discovery:
     runs-on: ${{ matrix.os }}
     strategy:

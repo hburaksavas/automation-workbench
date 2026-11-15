@@ -14,7 +14,8 @@
   "main": "./out/extension.js",
   "scripts": {
     "compile": "tsc -p .",
-    "vscode:prepublish": "npm run compile"
+    "vscode:prepublish": "npm run compile",
+    "test": "npm run compile && node --test test/*.test.cjs"
   },
   "capabilities": {
     "untrustedWorkspaces": {
@@ -26,9 +27,13 @@
     "taskDefinitions": [
       {
         "type": "testtr",
-        "required": ["action"],
+        "required": [
+          "action"
+        ],
         "properties": {
-          "action": { "type": "string" }
+          "action": {
+            "type": "string"
+          }
         }
       }
     ],
@@ -38,7 +43,14 @@
         "owner": "testtr",
         "source": "TestTR",
         "severity": "error",
-        "fileLocation": ["search", { "include": ["${workspaceFolder}"] }],
+        "fileLocation": [
+          "search",
+          {
+            "include": [
+              "${workspaceFolder}"
+            ]
+          }
+        ],
         "pattern": {
           "regexp": "^.*?\\[ERROR\\].*? on project [^:]+: ((?:[A-Za-z]:)?[^\\r\\n:]+\\.testtr):(\\d+)(?: → .*?)? \\[DSL\\] (.+?)(?: -> \\[Help \\d+\\])?\\s*$",
           "file": 1,
@@ -84,6 +96,50 @@
       {
         "command": "testtr.test",
         "title": "TestTR: Maven testlerini çalıştır"
+      },
+      {
+        "command": "testtr.mcp.validate",
+        "title": "TestTR: MCP ile senaryoyu doğrula"
+      },
+      {
+        "command": "testtr.mcp.preview",
+        "title": "TestTR: MCP ile Java önizlemesi"
+      },
+      {
+        "command": "testtr.mcp.impact",
+        "title": "TestTR: MCP ile değişiklik etkisini hesapla"
+      },
+      {
+        "command": "testtr.mcp.test",
+        "title": "TestTR: MCP ile etkilenen testleri çalıştır"
+      },
+      {
+        "command": "testtr.mcp.discover",
+        "title": "TestTR: Discovery ile obje keşfini başlat"
+      },
+      {
+        "command": "testtr.mcp.suggestRegistry",
+        "title": "TestTR: Discovery raporundan Registry önerisi üret"
+      },
+      {
+        "command": "testtr.mcp.reviewRegistry",
+        "title": "TestTR: Registry önerisini incele"
+      },
+      {
+        "command": "testtr.mcp.validateRegistry",
+        "title": "TestTR: Registry locator adaylarını doğrula"
+      },
+      {
+        "command": "testtr.mcp.applyRegistry",
+        "title": "TestTR: Seçilen adaylardan Registry snapshot oluştur"
+      },
+      {
+        "command": "testtr.mcp.openResultSource",
+        "title": "TestTR: MCP sonucundaki senaryoyu kaynakta aç"
+      },
+      {
+        "command": "testtr.mcp.disconnect",
+        "title": "TestTR: MCP bağlantılarını kapat"
       }
     ],
     "configuration": {
@@ -114,6 +170,105 @@
           "type": "string",
           "default": "target/generated-test-sources/testtr/dev/testtr/generated",
           "description": "Test modülüne göre dosya veya dizin yolu."
+        },
+        "testtr.mcp.java": {
+          "type": "string",
+          "default": "java",
+          "description": "MCP server için Java 17+ çalıştırılabilir dosyası. Shell kullanılmaz.",
+          "scope": "machine-overridable"
+        },
+        "testtr.mcp.testtrJar": {
+          "type": "string",
+          "default": "projects/testtr/mcp-server/target/testtr-mcp-server-0.1.0-SNAPSHOT.jar",
+          "description": "Çalışma alanına göre TestTR MCP JAR yolu.",
+          "scope": "resource"
+        },
+        "testtr.mcp.discoveryJar": {
+          "type": "string",
+          "default": "projects/testtr-discovery/target/testtr-discovery-0.1.0-SNAPSHOT.jar",
+          "description": "Çalışma alanına göre Discovery JAR yolu.",
+          "scope": "resource"
+        },
+        "testtr.mcp.mavenHome": {
+          "type": "string",
+          "default": "",
+          "description": "Maven kurulumu (boot ve bin dizinlerinin üstü). Maven işleri için gereklidir.",
+          "scope": "machine-overridable"
+        },
+        "testtr.mcp.pom": {
+          "type": "string",
+          "default": "",
+          "description": "Çalışma alanına göre test modülünün pom.xml yolu. Boşsa açık dosyanın en yakın POM dosyası veya seçim kullanılır.",
+          "scope": "resource"
+        },
+        "testtr.mcp.helpers": {
+          "type": "string",
+          "default": "src/test/helpers.json",
+          "description": "Test modülüne göre yardımcı işlem sözleşmesi; MCP önizlemesi içindir.",
+          "scope": "resource"
+        },
+        "testtr.mcp.requirements": {
+          "type": "string",
+          "default": "src/test/requirements.json",
+          "description": "Test modülüne göre gereksinim kataloğu; MCP önizlemesi içindir.",
+          "scope": "resource"
+        },
+        "testtr.mcp.impactBase": {
+          "type": "string",
+          "default": "HEAD",
+          "description": "Değişiklik etkisi için Git temel revizyonu.",
+          "scope": "resource"
+        },
+        "testtr.mcp.timeoutSeconds": {
+          "type": "integer",
+          "default": 600,
+          "description": "MCP arka plan işi zaman aşımı.",
+          "minimum": 1,
+          "maximum": 3600,
+          "scope": "resource"
+        },
+        "testtr.mcp.discoveryDuration": {
+          "type": "integer",
+          "default": 300,
+          "description": "Keşif süresi (saniye). Bildirimde İptal ile erken bitirilebilir.",
+          "minimum": 1,
+          "maximum": 3600,
+          "scope": "resource"
+        },
+        "testtr.mcp.browserChannel": {
+          "type": "string",
+          "default": "",
+          "description": "Discovery tarayıcı kanalı: boşsa Playwright Chromium; chrome veya msedge kurulu tarayıcıyı kullanır.",
+          "enum": [
+            "",
+            "chrome",
+            "msedge"
+          ],
+          "scope": "resource"
+        },
+        "testtr.mcp.discoveryFlow": {
+          "type": "string",
+          "default": "",
+          "description": "Çalışma alanına göre Discovery/locator doğrulama akış JSON dosyası (isteğe bağlı).",
+          "scope": "resource"
+        },
+        "testtr.mcp.pageMap": {
+          "type": "string",
+          "default": "",
+          "description": "Çalışma alanına göre URL → Registry sayfa adı eşleme JSON dosyası.",
+          "scope": "resource"
+        },
+        "testtr.mcp.baseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Göreli Registry adreslerini çözmek için temel URL.",
+          "scope": "resource"
+        },
+        "testtr.mcp.reportsDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Test modülüne göre özel Surefire rapor dizini; boşsa target/surefire-reports.",
+          "scope": "resource"
         }
       }
     }

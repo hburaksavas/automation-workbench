@@ -1,5 +1,7 @@
 # TestTR
 
+[TestTR MCP server](mcp-server/README.md), mevcut derleyiciyle doğrulama/Java önizlemesi ve Maven üzerinden etki analizi, seçmeli test koşumu, iş takibi ve sonuç okuma sunar. Discovery'den ayrı stdio server olarak çalışır.
+
 Türkçe senaryoları Maven test yaşam döngüsünde Java 17 testlerine dönüştüren başlangıç uygulaması.
 
 Desteklenen cümle kalıpları, hata örnekleri ve Java karşılıkları [dil sözleşmesinde](dil-sozlesmesi.md) yer alır.

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { access, readFile, readdir, stat } from 'node:fs/promises';
 import * as path from 'node:path';
+import { registerMcpCommands, closeMcpConnections, hasMcpOperation } from './mcpCommands';
 
 const selector = { language: 'testtr', scheme: 'file' };
 const windows = process.platform === 'win32';
@@ -128,8 +129,9 @@ async function showGenerated(document: vscode.TextDocument, module: string) {
 
 export function activate(context: vscode.ExtensionContext) {
     let running = false;
+    registerMcpCommands(context, () => running);
     async function run(action: 'validate' | 'preview' | 'test') {
-        if (running) {
+        if (running || hasMcpOperation()) {
             await vscode.window.showInformationMessage('Bir TestTR Maven görevi zaten çalışıyor.');
             return;
         }
@@ -189,3 +191,5 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('testtr.test', () => run('test'))
     );
 }
+
+export async function deactivate() { await closeMcpConnections(); }
