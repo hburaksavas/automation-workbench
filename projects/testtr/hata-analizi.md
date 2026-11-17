@@ -27,6 +27,11 @@ Hedef test çalıştırmaz; analiz üretiminin başarılı olması testlerin ge�
 gelmez. Eksik rapor dizini hatadır; mevcut ama boş dizin sıfır test olarak raporlanır.
 Girdi JUnit dosyasının üzerine analiz çıktısı yazılamaz.
 
+İç içe `testsuite` ve `testsuites` paketleri belge sırasıyla okunur. Çıktıdaki
+`suites` listesi düz tutulur; her paketin yalnızca doğrudan içerdiği testcase'ler
+sayılır. Üst paketlerdeki toplamlar testleri ikinci kez saydırmaz. Boş
+`testsuites` kapsayıcısı sıfır test olarak raporlanır.
+
 TestTR MCP server'ında `read_results`, yeni koşumun JUnit sonuçlarına aynı analizi
 ekler. `analyze_results` aracı, `reportsDirectory` ile açıkça seçilen mevcut raporları
 Maven kurulumu gerektirmeden okur. VS Code'da **TestTR: MCP ile JUnit hata analizini

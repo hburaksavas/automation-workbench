@@ -46,8 +46,8 @@ public final class FailureAnalyzer {
                 @Override public void fatalError(SAXParseException e) throws SAXException { throw e; }
             });
             Element root = builder.parse(file.toFile()).getDocumentElement();
-            List<Element> elements = root.getTagName().equals("testsuite") ? List.of(root) : children(root, "testsuite");
-            if (!Set.of("testsuite", "testsuites").contains(root.getTagName()) || elements.isEmpty()) throw new IllegalArgumentException("Expected JUnit testsuite or testsuites");
+            if (!Set.of("testsuite", "testsuites").contains(root.getTagName())) throw new IllegalArgumentException("Expected JUnit testsuite or testsuites");
+            List<Element> elements = suites(root);
             for (Element suite : elements) {
                 var item = suites.addObject();
                 for (String key : List.of("name", "tests", "failures", "errors", "skipped", "time")) item.put(key, suite.getAttribute(key));
@@ -114,6 +114,20 @@ public final class FailureAnalyzer {
         List<Element> result = new ArrayList<>();
         for (var node = parent.getFirstChild(); node != null; node = node.getNextSibling()) {
             if (node instanceof Element element && element.getTagName().equals(name)) result.add(element);
+        }
+        return result;
+    }
+    private static List<Element> suites(Element root) {
+        List<Element> result = new ArrayList<>();
+        Deque<Element> pending = new ArrayDeque<>();
+        pending.push(root);
+        while (!pending.isEmpty()) {
+            Element element = pending.pop();
+            if (element.getTagName().equals("testsuite")) result.add(element);
+            // Traverse only suite containers, never failure details or captured output.
+            for (var child = element.getLastChild(); child != null; child = child.getPreviousSibling()) {
+                if (child instanceof Element nested && Set.of("testsuite", "testsuites").contains(nested.getTagName())) pending.push(nested);
+            }
         }
         return result;
     }

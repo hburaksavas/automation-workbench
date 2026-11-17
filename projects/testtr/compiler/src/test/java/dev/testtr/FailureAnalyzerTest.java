@@ -80,4 +80,29 @@ class FailureAnalyzerTest {
         assertEquals(0, analyzer.analyze(analyzer.reports(directory)).at("/analysisSummary/testCount").asInt());
         assertThrows(IllegalArgumentException.class, () -> analyzer.reports(directory.resolve("missing")));
     }
+    @Test void nestedSuitesCountEachTestOnceAndPreserveDocumentOrder() throws Exception {
+        Path report = directory.resolve("TEST-nested.xml");
+        Files.writeString(report, "<testsuites><testsuite name=\"parent\" tests=\"3\">"
+                + "<testcase name=\"direct\"/>"
+                + "<testsuite name=\"child\">" + failure("DATA_MISSING") + "</testsuite>"
+                + "<testsuites><testsuite name=\"grandchild\"><testcase name=\"flaky\"><flakyError/></testcase></testsuite></testsuites>"
+                + "</testsuite><testsuite name=\"last\"><testcase><skipped/></testcase></testsuite></testsuites>");
+        var result = new FailureAnalyzer().analyze(List.of(report));
+        assertEquals(4, result.at("/analysisSummary/testCount").asInt());
+        assertEquals(1, result.at("/analysisSummary/failedCount").asInt());
+        assertEquals(1, result.at("/analysisSummary/flakyCount").asInt());
+        assertEquals(List.of("parent", "child", "grandchild", "last"),
+                java.util.stream.StreamSupport.stream(result.path("suites").spliterator(), false)
+                        .map(suite -> suite.path("name").asText()).toList());
+        assertEquals(1, result.at("/suites/0/testcases").size());
+        assertEquals("test-data", result.at("/suites/1/testcases/0/analysis/category").asText());
+        assertFalse(result.toString().contains("RAW_PASSWORD"));
+    }
+    @Test void suiteRootCanContainNestedSuitesAndEmptyContainerIsValid() throws Exception {
+        var result = analyze("<testsuite name=\"nested\"><testcase/></testsuite>");
+        assertEquals(1, result.at("/analysisSummary/testCount").asInt());
+        Path report = directory.resolve("TEST-empty.xml");
+        Files.writeString(report, "<testsuites/>");
+        assertEquals(0, new FailureAnalyzer().analyze(List.of(report)).at("/analysisSummary/testCount").asInt());
+    }
 }
