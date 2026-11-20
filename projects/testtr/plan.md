@@ -220,6 +220,14 @@ VS Code istemcisi `../testtr-vscode/` içinde eklendi. İki ayrı stdio bağlant
 
 Windows doğrulaması: Playwright ve MCP kabul profiliyle tam `clean verify` 91 testle geçti; Selenium ve Selenide örnek test koşumları da başarılı. VS Code tarafında 13 protokol/komut testi ve gerçek server'larla, sırlı koşumdaki tipli hatanın JUnit → MCP → istemci analizine taşınmasını da içeren kabul testi geçti (toplam 14). Maven `analyze` hedefi gerçek örnek raporlarında doğrulandı. Ubuntu CI sonucu ve önceki canlı Extension Host kontrolü henüz doğrulanmadı.
 
+Yeniden deneme kanıtları `retryFailures` alanıyla ayrı sunulur. Her kaydın tipli
+hata analizi ve rapor genelinde `retryFailureCount` bulunur; nihai test sonucu ve
+test bazındaki kategori sayaçları korunur. Bu kayıtlar otomatik yeniden koşum veya
+bakım başlatmaz. Kontrollü locator önerisi ve yeniden koşum maddesi açık kalır.
+21 Kasım 2026 Windows doğrulamasında `-pl compiler,maven-plugin,mcp-server -am test
+-Pmcp-acceptance` ile 75 test geçti; atlanan test olmadı. Maven JSON çıktısı ve
+MCP yanıtında yeniden deneme kanıtı ile hassas ayrıntıların gizlenmesi doğrulandı.
+
 **Kabul ölçütü.** Kontrollü locator değişikliği Registry güncellemesiyle giderilir. Kontrollü iş kuralı ihlalinde doğrulama başarısız kalır ve doğru bulgu raporlanır.
 
 ## Faz 7 — Otonom orkestrasyon

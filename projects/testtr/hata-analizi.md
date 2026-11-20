@@ -91,6 +91,19 @@ veya zaman aşımına uğrayan MCP işi `executionAnalysis.category: "uncertain"
 Mevcut rapor dizinini okuyan Maven hedefi ve `analyze_results`, dosyaların farklı
 koşumlardan gelebileceğini `reportScope` alanında belirtir.
 
+Her testcase'in `retryFailures` listesi, doğrudan içerdiği `flakyFailure`,
+`flakyError`, `rerunFailure` ve `rerunError` kayıtlarını XML sırasıyla gösterir.
+Her kayıtta `kind` ve aynı tipli kanıt kurallarıyla üretilmiş `analysis` bulunur;
+ham hata ayrıntıları aktarılmaz. Kayıt yoksa liste boştur. Bu kayıtların analizi
+testcase'in nihai `status` ve `analysis` alanlarını değiştirmez. Örneğin yeniden
+denemede geçen bir test `unstable-run` kalırken önceki hatanın gözlenen kategorisi
+ayrıca görülebilir. Başarısız kalan yeniden denemeler kararsızlık sayılmaz.
+
+`analysisSummary.retryFailureCount`, bu dört türdeki XML kayıtlarının toplamıdır;
+ilk başarısızlık, başarılı denemeler veya toplam çalıştırma sayısı değildir.
+`testCount`, `failedCount`, `flakyCount`, `uncertainCount` ve `categories` yalnızca
+testcase sonuçlarını sayar; yeniden deneme kanıtları bu sayıları şişirmez.
+
 Ham hata mesajı, stack trace, JUnit sistem özellikleri, stdout/stderr ve değerler
 analiz çıktısına aktarılmaz. Test/sınıf adları ve suite özetleri normal sonuç
 kimlikleri olarak korunur; adlara sır yazılmamalıdır. Tam hata kanıtları yerel JUnit

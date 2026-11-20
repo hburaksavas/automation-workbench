@@ -32,4 +32,18 @@ class AnalyzeMojoTest {
         assertEquals(content, Files.readString(xml));
         assertThrows(MojoExecutionException.class, () -> mojo(root.resolve("missing"), root.resolve("out.json")).execute());
     }
+    @Test void exportsRetryEvidenceAlongsideTheFinalTestOutcome() throws Exception {
+        Path reports = Files.createDirectory(root.resolve("reports"));
+        Files.writeString(reports.resolve("TEST-recovered.xml"), "<testsuite><testcase>"
+                + "<flakyError type=\"org.openqa.selenium.SessionNotCreatedException\" message=\"PRIVATE_PASSWORD\"/>"
+                + "</testcase></testsuite>");
+        Path output = root.resolve("analysis.json");
+        mojo(reports, output).execute();
+        var result = new com.fasterxml.jackson.databind.ObjectMapper().readTree(output.toFile());
+        assertEquals("passed", result.at("/suites/0/testcases/0/status").asText());
+        assertEquals("unstable-run", result.at("/suites/0/testcases/0/analysis/category").asText());
+        assertEquals("environment", result.at("/suites/0/testcases/0/retryFailures/0/analysis/category").asText());
+        assertEquals(1, result.at("/analysisSummary/retryFailureCount").asInt());
+        assertFalse(result.toString().contains("PRIVATE_PASSWORD"));
+    }
 }

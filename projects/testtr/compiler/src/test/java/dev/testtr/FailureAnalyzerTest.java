@@ -66,6 +66,51 @@ class FailureAnalyzerTest {
         var result = new FailureAnalyzer().analyze(List.of(first, second));
         assertEquals(0, result.at("/analysisSummary/flakyCount").asInt());
     }
+    @Test void retryEvidencePreservesOrderAndClassifiesEachRecordedFailureWithoutExportingDetails() throws Exception {
+        var result = analyze("<testcase name=\"recovered\">"
+                + "<flakyFailure type=\"dev.testtr.runtime.ScenarioFailure\" message=\"PRIVATE_MESSAGE [TESTTR_DIAGNOSTIC:LOCATOR_AMBIGUOUS]\">PRIVATE_STACK</flakyFailure>"
+                + "<flakyError type=\"org.openqa.selenium.SessionNotCreatedException\" message=\"PRIVATE_MESSAGE\"><stackTrace>PRIVATE_STACK</stackTrace><system-out>PRIVATE_OUTPUT</system-out></flakyError>"
+                + "</testcase>");
+        var test = result.at("/suites/0/testcases/0");
+        assertEquals("passed", test.path("status").asText());
+        assertEquals("unstable-run", test.at("/analysis/category").asText());
+        assertEquals(2, test.path("retryFailures").size());
+        assertEquals("flakyFailure", test.at("/retryFailures/0/kind").asText());
+        assertEquals("locator", test.at("/retryFailures/0/analysis/category").asText());
+        assertEquals("flakyError", test.at("/retryFailures/1/kind").asText());
+        assertEquals("environment", test.at("/retryFailures/1/analysis/category").asText());
+        for (var retry : test.path("retryFailures")) {
+            assertEquals("unconfirmed", retry.at("/analysis/rootCause").asText());
+            assertFalse(retry.at("/analysis/automaticMaintenanceAllowed").asBoolean());
+        }
+        assertEquals(2, result.at("/analysisSummary/retryFailureCount").asInt());
+        assertEquals(1, result.at("/analysisSummary/testCount").asInt());
+        assertEquals(1, result.at("/analysisSummary/flakyCount").asInt());
+        assertEquals(0, result.at("/analysisSummary/failedCount").asInt());
+        assertFalse(result.toString().contains("PRIVATE_"));
+        assertFalse(result.at("/analysisSummary/categories").has("locator"));
+    }
+    @Test void failedRetriesDoNotOverrideFinalFailureOrProveChangedOutcome() throws Exception {
+        var result = analyze(failure("ASSERTION_MISMATCH").replace("</testcase>",
+                "<rerunError type=\"org.openqa.selenium.SessionNotCreatedException\"/>"
+                + "<rerunFailure type=\"java.lang.AssertionError\" message=\"[TESTTR_DIAGNOSTIC:LOCATOR_AMBIGUOUS]\"/>"
+                + "</testcase>"));
+        var test = result.at("/suites/0/testcases/0");
+        assertEquals("failed", test.path("status").asText());
+        assertEquals("application-behavior", test.at("/analysis/category").asText());
+        assertEquals("rerunError", test.at("/retryFailures/0/kind").asText());
+        assertEquals("environment", test.at("/retryFailures/0/analysis/category").asText());
+        assertEquals("uncertain", test.at("/retryFailures/1/analysis/category").asText());
+        assertEquals(2, result.at("/analysisSummary/retryFailureCount").asInt());
+        assertEquals(0, result.at("/analysisSummary/flakyCount").asInt());
+        assertEquals(1, result.at("/analysisSummary/failedCount").asInt());
+    }
+    @Test void nestedRetryDetailsAreNotAdditionalAttemptsAndAbsentRetriesAreExplicitlyEmpty() throws Exception {
+        var result = analyze("<testcase><failure><rerunFailure/></failure></testcase><testcase/>");
+        assertTrue(result.at("/suites/0/testcases/0/retryFailures").isEmpty());
+        assertTrue(result.at("/suites/0/testcases/1/retryFailures").isEmpty());
+        assertEquals(0, result.at("/analysisSummary/retryFailureCount").asInt());
+    }
     @Test void readsContainerReportsAndRejectsExternalEntitiesAndInvalidSchema() throws Exception {
         Path report = directory.resolve("TEST-container.xml");
         Files.writeString(report, "<testsuites><testsuite><testcase name=\"a\"/></testsuite><testsuite><testcase name=\"b\"/></testsuite></testsuites>");

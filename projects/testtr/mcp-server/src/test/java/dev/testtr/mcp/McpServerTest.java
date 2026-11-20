@@ -14,13 +14,16 @@ class McpServerTest {
     @Test void existingReportsAreAnalyzedWithoutMavenAndRawFailureDetailsStayLocal() throws Exception {
         Files.createDirectory(root.resolve("reports"));
         Files.writeString(root.resolve("reports/TEST-failed.xml"), """
-            <testsuite><testcase name="scenario" classname="Scenario_1Test"><failure type="dev.testtr.runtime.ScenarioFailure" message="source.testtr:3 [TESTTR_DIAGNOSTIC:DATA_MISSING]">PRIVATE_PASSWORD</failure><system-out>PRIVATE_PASSWORD</system-out></testcase></testsuite>
+            <testsuite><testcase name="scenario" classname="Scenario_1Test"><failure type="dev.testtr.runtime.ScenarioFailure" message="source.testtr:3 [TESTTR_DIAGNOSTIC:DATA_MISSING]">PRIVATE_PASSWORD</failure><rerunError type="org.openqa.selenium.SessionNotCreatedException" message="PRIVATE_PASSWORD"/><system-out>PRIVATE_PASSWORD</system-out></testcase></testsuite>
             """);
         try (var server = new McpServer(root, null, null)) {
             ready(server);
             var response = call(server, "analyze_results", ProjectService.JSON.createObjectNode().put("reportsDirectory", "reports"));
             assertFalse(response.at("/result/isError").asBoolean());
             assertEquals("test-data", response.at("/result/structuredContent/suites/0/testcases/0/analysis/category").asText());
+            assertEquals("environment", response.at("/result/structuredContent/suites/0/testcases/0/retryFailures/0/analysis/category").asText());
+            assertEquals(1, response.at("/result/structuredContent/analysisSummary/retryFailureCount").asInt());
+            assertEquals(0, response.at("/result/structuredContent/analysisSummary/flakyCount").asInt());
             assertFalse(response.toString().contains("PRIVATE_PASSWORD"));
             assertTrue(call(server, "analyze_results", ProjectService.JSON.createObjectNode().put("reportsDirectory", "../outside")).at("/result/isError").asBoolean());
         }

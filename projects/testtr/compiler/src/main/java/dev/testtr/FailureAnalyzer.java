@@ -32,7 +32,7 @@ public final class FailureAnalyzer {
         var suites = result.putArray("suites");
         var summary = result.putObject("analysisSummary");
         var categories = summary.putObject("categories");
-        int total = 0, failed = 0, flaky = 0, uncertain = 0;
+        int total = 0, failed = 0, flaky = 0, uncertain = 0, retryFailures = 0;
         var factory = DocumentBuilderFactory.newInstance();
         factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
@@ -60,6 +60,14 @@ public final class FailureAnalyzer {
                     var primary = new ArrayList<Element>(failures); primary.addAll(errors);
                     ObjectNode analysis = classify(primary, status, changedOutcome);
                     entry.set("analysis", analysis);
+                    var retries = entry.putArray("retryFailures");
+                    for (var child = test.getFirstChild(); child != null; child = child.getNextSibling()) {
+                        if (child instanceof Element retry && Set.of("flakyFailure", "flakyError", "rerunFailure", "rerunError").contains(retry.getTagName())) {
+                            var attempt = retries.addObject().put("kind", retry.getTagName());
+                            attempt.set("analysis", classify(List.of(retry), "failed", false));
+                            retryFailures++;
+                        }
+                    }
                     String category = analysis.path("category").asText();
                     total++;
                     if (Set.of("failed", "error").contains(status)) failed++;
@@ -69,7 +77,8 @@ public final class FailureAnalyzer {
                 }
             }
         }
-        summary.put("testCount", total).put("failedCount", failed).put("flakyCount", flaky).put("uncertainCount", uncertain);
+        summary.put("testCount", total).put("failedCount", failed).put("flakyCount", flaky).put("uncertainCount", uncertain)
+                .put("retryFailureCount", retryFailures);
         result.put("evidencePolicy", "Typed observations only; root cause is unconfirmed. No automatic repair or cross-run flakiness inference.");
         return result;
     }
